@@ -25,12 +25,20 @@ jobs:
       - name: check branch name
         id: branch-name
         run: |
-          branch_name="$(git rev-parse --abbrev-ref HEAD)"
+          echo "GITHUB_REF: $GITHUB_REF"
+          if [[ "$GITHUB_REF" == refs/heads/* ]]; then
+            BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          elif [[ "$GITHUB_REF" == refs/pull/*/merge ]]; then
+            BRANCH_NAME=$(echo $GITHUB_REF | sed -n 's|refs/pull/\([0-9]\+\)/merge|PR-\1|p')
+          else
+            BRANCH_NAME="unknown"
+          fi
+          echo "Current branch: $BRANCH_NAME"
           valid_branch_regex="${{ vars.VALID_BRANCH_REGEX }}"
           
-          if [[ $branch_name =~ $valid_branch_regex ]]; then
-            echo "Branch name: $branch_name is valid"
+          if [[ $BRANCH_NAME =~ $valid_branch_regex ]]; then
+            echo "Branch name: $BRANCH_NAME is valid"
           else
-            echo "Branch name: $branch_name is not valid"
+            echo "Branch name: $BRANCH_NAME is not valid"
             exit 1
           fi
