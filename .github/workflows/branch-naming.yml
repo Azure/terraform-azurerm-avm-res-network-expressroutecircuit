@@ -3,9 +3,8 @@ name: branch-naming
 
 on:
   pull_request:
-    types: ['opened', 'reopened', 'synchronize']
-  merge_group:
-  workflow_dispatch:
+    branches:
+      - '*'
 
 permissions:
   contents: read
@@ -42,3 +41,6 @@ jobs:
             echo "Branch name: $BRANCH_NAME is not valid"
             exit 1
           fi
+
+
+          branch_name="$(git rev-parse --abbrev-ref HEAD)"
