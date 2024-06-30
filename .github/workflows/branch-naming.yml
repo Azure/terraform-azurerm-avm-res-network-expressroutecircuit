@@ -1,0 +1,35 @@
+---
+name: branch-naming
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: branch-naming-${{ github.event.pull_request.head.repo.full_name }}/${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  check-branch-naming:
+    name: check-branch-naming
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+
+      - name: check branch name
+        id: branch-name
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          valid_branch_regex="${{ vars.VALID_BRANCH_REGEX }}"
+          
+          if [[ $BRANCH_NAME =~ $valid_branch_regex ]]; then
+            echo "Branch name: $BRANCH_NAME is valid"
+          else
+            echo "Branch name: $BRANCH_NAME is not valid"
+            exit 1
+          fi
