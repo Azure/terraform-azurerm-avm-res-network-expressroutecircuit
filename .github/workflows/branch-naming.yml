@@ -25,7 +25,6 @@ jobs:
         id: branch-name
         run: |
           BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
-          echo "Current branch: $BRANCH_NAME"
           valid_branch_regex="${{ vars.VALID_BRANCH_REGEX }}"
           
           if [[ $BRANCH_NAME =~ $valid_branch_regex ]]; then
@@ -34,6 +33,3 @@ jobs:
             echo "Branch name: $BRANCH_NAME is not valid"
             exit 1
           fi
-
-
-          branch_name="$(git rev-parse --abbrev-ref HEAD)"
