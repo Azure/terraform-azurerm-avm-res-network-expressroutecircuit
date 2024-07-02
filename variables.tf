@@ -1,3 +1,32 @@
+variable "express_route_gateway_resource_ids" {
+  type = map(object({
+    connection_name     = string
+    gateway_resource_id = string
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+    (Optional) A map of association objects to create connections between the created circuit and the required gateways. 
+
+    - `connection_name` - (Required) The name of the connection.
+    - `gateway_resource_id` - (Required) The id of the gateway resource, must be supplied in the form of an Azure resource ID.
+
+    Example Input:
+
+    ```terraform
+    connections = {
+        connection1 = {
+          connection_name     = var.connection1-name
+          gateway_resource_id = azurerm_express_route_gateway.example.id
+        },
+        connection2 = {
+          connection_name     = "connection2"
+          gateway_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/Microsoft.Network/expressRouteGateways/myExpressRouteGateway"
+        }
+    }
+    ```
+  DESCRIPTION
+}
+
 variable "location" {
   type        = string
   description = "Azure region where the resource should be deployed."
