@@ -31,4 +31,6 @@ locals {
     ]
   ]) : "${assoc.pe_key}-${assoc.asg_key}" => assoc }
   role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
+
+  exr_circuit_tags = var.exr_circuit_tags != null && var.tags != null ? merge(var.exr_circuit_tags, var.tags) : var.exr_circuit_tags != null ? var.exr_circuit_tags : var.tags
 }

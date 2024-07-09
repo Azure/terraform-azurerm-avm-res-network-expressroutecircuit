@@ -1,3 +1,112 @@
+variable "resource_group_name" {
+  type        = string
+  description = <<DESCRIPTION
+(Required) The name of the resource group where the resources will be deployed. 
+DESCRIPTION  
+  nullable    = false
+}
+
+variable "location" {
+  type        = string
+  description = <<DESCRIPTION
+(Required) The location/region where the ExpressRoute Circuit is created. Changing this forces a new resource to be created. 
+DESCRIPTION
+  nullable    = false
+}
+
+variable "exr_circuit_name" {
+  type        = string
+  description = <<DESCRIPTION
+  (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
+DESCRIPTION
+  nullable    = false
+}
+
+variable "service_provider_name" {
+  type        = string
+  description = <<DESCRIPTION
+  (Required) The name of the service provider.
+DESCRIPTION
+  nullable = false
+}
+
+variable "peering_location" {
+  type        = string
+  description = <<DESCRIPTION
+  (Required) The peering location.
+DESCRIPTION
+  nullable = false  
+}
+
+variable "bandwidth_in_mbps" {
+  type        = number
+  description = <<DESCRIPTION
+  (Optional) The bandwidth in Mbps.
+DESCRIPTION
+  default = null  
+}
+
+variable "sku" {
+  type = object({
+    tier   = string
+    family = string
+  })
+  nullable = false
+  description = <<DESCRIPTION
+  (Required) The SKU of the ExpressRoute Circuit.
+DESCRIPTION
+
+  validation {
+    condition     = contains(["Local", "Standard", "Premium"], var.sku.tier)
+    error_message = "The SKU tier must be either 'Local', 'Standard', or 'Premium'."
+  }
+
+  validation {
+    condition     = contains(["MeteredData", "UnlimitedData"], var.sku.family)
+    error_message = "The SKU family must be either 'MeteredData' or 'UnlimitedData'."
+  }
+}
+
+variable "allow_classic_operations" {
+  type        = bool
+  description = <<DESCRIPTION
+  (Optional) Allow classic operations.
+DESCRIPTION
+  default = false  
+}
+
+variable "express_route_port_id" {
+  type        = string
+  description = <<DESCRIPTION
+  (Optional) The ID of the ExpressRoute Port.
+DESCRIPTION
+  default = null  
+}
+
+variable "bandwidth_in_gbps" {
+  type        = number
+  description = <<DESCRIPTION
+  (Optional) The bandwidth in Gbps.
+DESCRIPTION
+  default = null
+}
+
+variable "authorization_key" {
+  type        = string
+  description = <<DESCRIPTION
+  (Optional) The authorization key of the ExpressRoute Circuit.
+DESCRIPTION
+  default = null
+}
+
+variable "exr_circuit_tags" {
+  type        = map(string)
+  description = <<DESCRIPTION
+  (Optional) A mapping of tags to assign to the ExpressRoute Circuit.
+DESCRIPTION
+  default = null
+}
+
 variable "express_route_gateway_resource_ids" {
   type = map(object({
     connection_name     = string
@@ -25,30 +134,6 @@ variable "express_route_gateway_resource_ids" {
     }
     ```
   DESCRIPTION
-}
-
-variable "location" {
-  type        = string
-  description = "Azure region where the resource should be deployed."
-  nullable    = false
-}
-
-variable "name" {
-  type        = string
-  description = "The name of the this resource."
-
-  validation {
-    condition     = can(regex("TODO", var.name))
-    error_message = "The name must be TODO." # TODO remove the example below once complete:
-    #condition     = can(regex("^[a-z0-9]{5,50}$", var.name))
-    #error_message = "The name must be between 5 and 50 characters long and can only contain lowercase letters and numbers."
-  }
-}
-
-# This is required for most resource modules
-variable "resource_group_name" {
-  type        = string
-  description = "The resource group where the resources will be deployed."
 }
 
 # required AVM interfaces
