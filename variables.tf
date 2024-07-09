@@ -1,8 +1,8 @@
-variable "resource_group_name" {
+variable "exr_circuit_name" {
   type        = string
   description = <<DESCRIPTION
-(Required) The name of the resource group where the resources will be deployed. 
-DESCRIPTION  
+  (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
+DESCRIPTION
   nullable    = false
 }
 
@@ -14,11 +14,19 @@ DESCRIPTION
   nullable    = false
 }
 
-variable "exr_circuit_name" {
+variable "peering_location" {
   type        = string
   description = <<DESCRIPTION
-  (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
+  (Required) The peering location.
 DESCRIPTION
+  nullable    = false
+}
+
+variable "resource_group_name" {
+  type        = string
+  description = <<DESCRIPTION
+(Required) The name of the resource group where the resources will be deployed. 
+DESCRIPTION  
   nullable    = false
 }
 
@@ -27,23 +35,7 @@ variable "service_provider_name" {
   description = <<DESCRIPTION
   (Required) The name of the service provider.
 DESCRIPTION
-  nullable = false
-}
-
-variable "peering_location" {
-  type        = string
-  description = <<DESCRIPTION
-  (Required) The peering location.
-DESCRIPTION
-  nullable = false  
-}
-
-variable "bandwidth_in_mbps" {
-  type        = number
-  description = <<DESCRIPTION
-  (Optional) The bandwidth in Mbps.
-DESCRIPTION
-  default = null  
+  nullable    = false
 }
 
 variable "sku" {
@@ -51,16 +43,15 @@ variable "sku" {
     tier   = string
     family = string
   })
-  nullable = false
   description = <<DESCRIPTION
   (Required) The SKU of the ExpressRoute Circuit.
 DESCRIPTION
+  nullable    = false
 
   validation {
     condition     = contains(["Local", "Standard", "Premium"], var.sku.tier)
     error_message = "The SKU tier must be either 'Local', 'Standard', or 'Premium'."
   }
-
   validation {
     condition     = contains(["MeteredData", "UnlimitedData"], var.sku.family)
     error_message = "The SKU family must be either 'MeteredData' or 'UnlimitedData'."
@@ -69,71 +60,34 @@ DESCRIPTION
 
 variable "allow_classic_operations" {
   type        = bool
+  default     = false
   description = <<DESCRIPTION
   (Optional) Allow classic operations.
 DESCRIPTION
-  default = false  
-}
-
-variable "express_route_port_id" {
-  type        = string
-  description = <<DESCRIPTION
-  (Optional) The ID of the ExpressRoute Port.
-DESCRIPTION
-  default = null  
-}
-
-variable "bandwidth_in_gbps" {
-  type        = number
-  description = <<DESCRIPTION
-  (Optional) The bandwidth in Gbps.
-DESCRIPTION
-  default = null
 }
 
 variable "authorization_key" {
   type        = string
+  default     = null
   description = <<DESCRIPTION
   (Optional) The authorization key of the ExpressRoute Circuit.
 DESCRIPTION
-  default = null
 }
 
-variable "exr_circuit_tags" {
-  type        = map(string)
+variable "bandwidth_in_gbps" {
+  type        = number
+  default     = null
   description = <<DESCRIPTION
-  (Optional) A mapping of tags to assign to the ExpressRoute Circuit.
+  (Optional) The bandwidth in Gbps.
 DESCRIPTION
-  default = null
 }
 
-variable "express_route_gateway_resource_ids" {
-  type = map(object({
-    connection_name     = string
-    gateway_resource_id = string
-  }))
-  default     = {}
+variable "bandwidth_in_mbps" {
+  type        = number
+  default     = null
   description = <<DESCRIPTION
-    (Optional) A map of association objects to create connections between the created circuit and the required gateways. 
-
-    - `connection_name` - (Required) The name of the connection.
-    - `gateway_resource_id` - (Required) The id of the gateway resource, must be supplied in the form of an Azure resource ID.
-
-    Example Input:
-
-    ```terraform
-    connections = {
-        connection1 = {
-          connection_name     = var.connection1-name
-          gateway_resource_id = azurerm_express_route_gateway.example.id
-        },
-        connection2 = {
-          connection_name     = "connection2"
-          gateway_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/Microsoft.Network/expressRouteGateways/myExpressRouteGateway"
-        }
-    }
-    ```
-  DESCRIPTION
+  (Optional) The bandwidth in Mbps.
+DESCRIPTION
 }
 
 # required AVM interfaces
@@ -211,6 +165,51 @@ variable "enable_telemetry" {
 This variable controls whether or not telemetry is enabled for the module.
 For more information see <https://aka.ms/avm/telemetryinfo>.
 If it is set to false, then no telemetry will be collected.
+DESCRIPTION
+}
+
+variable "express_route_gateway_resource_ids" {
+  type = map(object({
+    connection_name     = string
+    gateway_resource_id = string
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+    (Optional) A map of association objects to create connections between the created circuit and the required gateways. 
+
+    - `connection_name` - (Required) The name of the connection.
+    - `gateway_resource_id` - (Required) The id of the gateway resource, must be supplied in the form of an Azure resource ID.
+
+    Example Input:
+
+    ```terraform
+    connections = {
+        connection1 = {
+          connection_name     = var.connection1-name
+          gateway_resource_id = azurerm_express_route_gateway.example.id
+        },
+        connection2 = {
+          connection_name     = "connection2"
+          gateway_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/Microsoft.Network/expressRouteGateways/myExpressRouteGateway"
+        }
+    }
+    ```
+  DESCRIPTION
+}
+
+variable "express_route_port_id" {
+  type        = string
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) The ID of the ExpressRoute Port.
+DESCRIPTION
+}
+
+variable "exr_circuit_tags" {
+  type        = map(string)
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) A mapping of tags to assign to the ExpressRoute Circuit.
 DESCRIPTION
 }
 

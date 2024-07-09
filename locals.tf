@@ -1,5 +1,6 @@
 # TODO: insert locals here.
 locals {
+  exr_circuit_tags = var.exr_circuit_tags != null && var.tags != null ? merge(var.exr_circuit_tags, var.tags) : var.exr_circuit_tags != null ? var.exr_circuit_tags : var.tags
   managed_identities = {
     system_assigned_user_assigned = (var.managed_identities.system_assigned || length(var.managed_identities.user_assigned_resource_ids) > 0) ? {
       this = {
@@ -31,6 +32,4 @@ locals {
     ]
   ]) : "${assoc.pe_key}-${assoc.asg_key}" => assoc }
   role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
-
-  exr_circuit_tags = var.exr_circuit_tags != null && var.tags != null ? merge(var.exr_circuit_tags, var.tags) : var.exr_circuit_tags != null ? var.exr_circuit_tags : var.tags
 }

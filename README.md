@@ -42,41 +42,96 @@ The following providers are used by this module:
 
 The following resources are used by this module:
 
+- [azurerm_express_route_circuit.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_circuit) (resource)
 - [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
-- [azurerm_private_endpoint.this_managed_dns_zone_groups](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
-- [azurerm_private_endpoint.this_unmanaged_dns_zone_groups](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
-- [azurerm_private_endpoint_application_security_group_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint_application_security_group_association) (resource)
-- [azurerm_resource_group.TODO](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [azurerm_resource_group_template_deployment.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group_template_deployment) (resource)
 - [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [random_id.telem](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) (resource)
+- [azurerm_resource_group.parent](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
 The following input variables are required:
 
-### <a name="input_location"></a> [location](#input\_location)
+### <a name="input_exr_circuit_name"></a> [exr\_circuit\_name](#input\_exr\_circuit\_name)
 
-Description: Azure region where the resource should be deployed.
+Description:   (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
 
 Type: `string`
 
-### <a name="input_name"></a> [name](#input\_name)
+### <a name="input_location"></a> [location](#input\_location)
 
-Description: The name of the this resource.
+Description: (Required) The location/region where the ExpressRoute Circuit is created. Changing this forces a new resource to be created.
+
+Type: `string`
+
+### <a name="input_peering_location"></a> [peering\_location](#input\_peering\_location)
+
+Description:   (Required) The peering location.
 
 Type: `string`
 
 ### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
 
-Description: The resource group where the resources will be deployed.
+Description: (Required) The name of the resource group where the resources will be deployed.
 
 Type: `string`
+
+### <a name="input_service_provider_name"></a> [service\_provider\_name](#input\_service\_provider\_name)
+
+Description:   (Required) The name of the service provider.
+
+Type: `string`
+
+### <a name="input_sku"></a> [sku](#input\_sku)
+
+Description:   (Required) The SKU of the ExpressRoute Circuit.
+
+Type:
+
+```hcl
+object({
+    tier   = string
+    family = string
+  })
+```
 
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_allow_classic_operations"></a> [allow\_classic\_operations](#input\_allow\_classic\_operations)
+
+Description:   (Optional) Allow classic operations.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_authorization_key"></a> [authorization\_key](#input\_authorization\_key)
+
+Description:   (Optional) The authorization key of the ExpressRoute Circuit.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_bandwidth_in_gbps"></a> [bandwidth\_in\_gbps](#input\_bandwidth\_in\_gbps)
+
+Description:   (Optional) The bandwidth in Gbps.
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_bandwidth_in_mbps"></a> [bandwidth\_in\_mbps](#input\_bandwidth\_in\_mbps)
+
+Description:   (Optional) The bandwidth in Mbps.
+
+Type: `number`
+
+Default: `null`
 
 ### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
 
@@ -145,6 +200,56 @@ If it is set to false, then no telemetry will be collected.
 Type: `bool`
 
 Default: `true`
+
+### <a name="input_express_route_gateway_resource_ids"></a> [express\_route\_gateway\_resource\_ids](#input\_express\_route\_gateway\_resource\_ids)
+
+Description:     (Optional) A map of association objects to create connections between the created circuit and the required gateways.
+
+    - `connection_name` - (Required) The name of the connection.
+    - `gateway_resource_id` - (Required) The id of the gateway resource, must be supplied in the form of an Azure resource ID.
+
+    Example Input:
+
+    ```terraform
+    connections = {
+        connection1 = {
+          connection_name     = var.connection1-name
+          gateway_resource_id = azurerm_express_route_gateway.example.id
+        },
+        connection2 = {
+          connection_name     = "connection2"
+          gateway_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/Microsoft.Network/expressRouteGateways/myExpressRouteGateway"
+        }
+    }
+    
+```
+
+Type:
+
+```hcl
+map(object({
+    connection_name     = string
+    gateway_resource_id = string
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_express_route_port_id"></a> [express\_route\_port\_id](#input\_express\_route\_port\_id)
+
+Description:   (Optional) The ID of the ExpressRoute Port.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_exr_circuit_tags"></a> [exr\_circuit\_tags](#input\_exr\_circuit\_tags)
+
+Description:   (Optional) A mapping of tags to assign to the ExpressRoute Circuit.
+
+Type: `map(string)`
+
+Default: `null`
 
 ### <a name="input_lock"></a> [lock](#input\_lock)
 
@@ -287,13 +392,9 @@ Default: `null`
 
 The following outputs are exported:
 
-### <a name="output_private_endpoints"></a> [private\_endpoints](#output\_private\_endpoints)
+### <a name="output_expressroute_circuit"></a> [expressroute\_circuit](#output\_expressroute\_circuit)
 
-Description:   A map of the private endpoints created.
-
-### <a name="output_resource"></a> [resource](#output\_resource)
-
-Description: This is the full output for the resource.
+Description: Express Route Circuit resource.
 
 ## Modules
 

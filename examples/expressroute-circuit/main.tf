@@ -17,13 +17,13 @@ provider "azurerm" {
 }
 
 locals {
-  service_provider_name = "Equinix"
-  resource_group_name   = "rg-exr-circuit"
+  bandwidth_in_mbps     = 50
+  family                = "UnlimitedData"
   location              = "East US"
   peering_location      = "Silicon Valley"
-  bandwidth_in_mbps     = 50
+  resource_group_name   = "rg-exr-circuit"
+  service_provider_name = "Equinix"
   tier                  = "Standard"
-  family                = "UnlimitedData"
 }
 
 
@@ -66,11 +66,11 @@ module "test" {
   peering_location      = local.peering_location
   bandwidth_in_mbps     = local.bandwidth_in_mbps
 
-  sku = { 
+  sku = {
     tier   = local.tier
     family = local.family
   }
 
   enable_telemetry = var.enable_telemetry # see variables.tf
-  depends_on = [ azurerm_resource_group.this ]
+  depends_on       = [azurerm_resource_group.this]
 }
