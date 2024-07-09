@@ -42,14 +42,15 @@ The following providers are used by this module:
 
 The following resources are used by this module:
 
+- [azurerm_express_route_connection.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_connection) (resource)
 - [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
 - [azurerm_private_endpoint.this_managed_dns_zone_groups](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
 - [azurerm_private_endpoint.this_unmanaged_dns_zone_groups](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
 - [azurerm_private_endpoint_application_security_group_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint_application_security_group_association) (resource)
-- [azurerm_resource_group.TODO](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 - [azurerm_resource_group_template_deployment.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group_template_deployment) (resource)
 - [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [random_id.telem](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) (resource)
+- [azurerm_resource_group.parent](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
@@ -145,6 +146,40 @@ If it is set to false, then no telemetry will be collected.
 Type: `bool`
 
 Default: `true`
+
+### <a name="input_express_route_gateway_resource_ids"></a> [express\_route\_gateway\_resource\_ids](#input\_express\_route\_gateway\_resource\_ids)
+
+Description:     (Optional) A map of association objects to create connections between the created circuit and the required gateways.
+
+    - `connection_name` - (Required) The name of the connection.
+    - `gateway_resource_id` - (Required) The id of the gateway resource, must be supplied in the form of an Azure resource ID.
+
+    Example Input:
+
+    ```terraform
+    connections = {
+        connection1 = {
+          connection_name     = var.connection1-name
+          gateway_resource_id = azurerm_express_route_gateway.example.id
+        },
+        connection2 = {
+          connection_name     = "connection2"
+          gateway_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/Microsoft.Network/expressRouteGateways/myExpressRouteGateway"
+        }
+    }
+    
+```
+
+Type:
+
+```hcl
+map(object({
+    connection_name     = string
+    gateway_resource_id = string
+  }))
+```
+
+Default: `{}`
 
 ### <a name="input_lock"></a> [lock](#input\_lock)
 

@@ -6,9 +6,9 @@ data "azurerm_resource_group" "parent" {
 resource "azurerm_express_route_connection" "this" {
   for_each = var.express_route_gateway_resource_ids
 
-  name                             = each.value.connection_name
-  express_route_gateway_id         = each.value.gateway_resource_id
   express_route_circuit_peering_id = azurerm_express_route_circuit_peering.example.id # TODO - replace with circuit peering id
+  express_route_gateway_id         = each.value.gateway_resource_id
+  name                             = each.value.connection_name
 }
 
 # required AVM resources interfaces
