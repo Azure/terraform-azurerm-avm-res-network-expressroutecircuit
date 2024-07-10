@@ -4,7 +4,7 @@ data "azurerm_resource_group" "parent" {
 
 # Create connection between the Express Route Circuit and the Express Route Gateways
 resource "azurerm_express_route_connection" "this" {
-  for_each = var.express_route_gateway_resource_ids
+  for_each = var.connections
 
   name                             = each.value.connection_name
   express_route_gateway_id         = each.value.gateway_resource_id
