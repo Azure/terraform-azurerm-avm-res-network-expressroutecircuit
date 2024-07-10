@@ -2,7 +2,7 @@
 # Create the Express Route Circuit
 resource "azurerm_express_route_circuit" "this" {
   location                 = data.azurerm_resource_group.parent.location
-  name                     = var.exr_circuit_name
+  name                     = var.name
   resource_group_name      = var.resource_group_name
   allow_classic_operations = var.allow_classic_operations
   authorization_key        = var.authorization_key

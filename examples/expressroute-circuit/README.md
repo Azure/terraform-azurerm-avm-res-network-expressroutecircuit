@@ -67,7 +67,7 @@ module "test" {
   source                = "../../"
   resource_group_name   = azurerm_resource_group.this.name
   location              = azurerm_resource_group.this.location
-  exr_circuit_name      = module.naming.express_route_circuit.name
+  name                  = module.naming.express_route_circuit.name
   service_provider_name = local.service_provider_name
   peering_location      = local.peering_location
   bandwidth_in_mbps     = local.bandwidth_in_mbps
