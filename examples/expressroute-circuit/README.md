@@ -66,7 +66,6 @@ resource "azurerm_resource_group" "this" {
 module "test" {
   source                = "../../"
   resource_group_name   = azurerm_resource_group.this.name
-  location              = azurerm_resource_group.this.location
   name                  = module.naming.express_route_circuit.name
   service_provider_name = local.service_provider_name
   peering_location      = local.peering_location

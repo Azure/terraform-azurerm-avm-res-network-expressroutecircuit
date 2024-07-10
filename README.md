@@ -55,12 +55,6 @@ The following resources are used by this module:
 
 The following input variables are required:
 
-### <a name="input_location"></a> [location](#input\_location)
-
-Description: (Required) The location/region where the ExpressRoute Circuit is created. Changing this forces a new resource to be created.
-
-Type: `string`
-
 ### <a name="input_name"></a> [name](#input\_name)
 
 Description:   (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
@@ -278,6 +272,7 @@ map(object({
     condition                              = optional(string, null)
     condition_version                      = optional(string, null)
     delegated_managed_identity_resource_id = optional(string, null)
+    principal_type                         = optional(string, null)
   }))
 ```
 
@@ -295,9 +290,17 @@ Default: `null`
 
 The following outputs are exported:
 
-### <a name="output_expressroute_circuit"></a> [expressroute\_circuit](#output\_expressroute\_circuit)
+### <a name="output_name"></a> [name](#output\_name)
 
-Description: Express Route Circuit resource.
+Description: The resource name of the ExpressRoute circuit.
+
+### <a name="output_resource"></a> [resource](#output\_resource)
+
+Description: The Azure ExpressRoute circuit resource.
+
+### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
+
+Description: The resource ID of the ExpressRoute circuit.
 
 ## Modules
 

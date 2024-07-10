@@ -1,11 +1,3 @@
-variable "location" {
-  type        = string
-  description = <<DESCRIPTION
-(Required) The location/region where the ExpressRoute Circuit is created. Changing this forces a new resource to be created. 
-DESCRIPTION
-  nullable    = false
-}
-
 variable "name" {
   type        = string
   description = <<DESCRIPTION
@@ -228,6 +220,7 @@ variable "role_assignments" {
     condition                              = optional(string, null)
     condition_version                      = optional(string, null)
     delegated_managed_identity_resource_id = optional(string, null)
+    principal_type                         = optional(string, null)
   }))
   default     = {}
   description = <<DESCRIPTION
