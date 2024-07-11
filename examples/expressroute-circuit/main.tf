@@ -16,6 +16,16 @@ provider "azurerm" {
   features {}
 }
 
+locals {
+  bandwidth_in_mbps     = 50
+  family                = "UnlimitedData"
+  location              = "East US"
+  peering_location      = "Silicon Valley"
+  resource_group_name   = "rg-exr-circuit"
+  service_provider_name = "Equinix"
+  tier                  = "Standard"
+}
+
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
@@ -39,12 +49,27 @@ module "naming" {
 
 # This is required for resource modules
 resource "azurerm_resource_group" "this" {
-  location = module.regions.regions[random_integer.region_index.result].name
-  name     = module.naming.resource_group.name_unique
+  location = local.location
+  name     = local.resource_group_name
 }
 
 # This is the module call
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
+module "test" {
+  source                = "../../"
+  resource_group_name   = azurerm_resource_group.this.name
+  name                  = module.naming.express_route_circuit.name
+  service_provider_name = local.service_provider_name
+  peering_location      = local.peering_location
+  bandwidth_in_mbps     = local.bandwidth_in_mbps
 
+  sku = {
+    tier   = local.tier
+    family = local.family
+  }
+
+  enable_telemetry = var.enable_telemetry # see variables.tf
+  depends_on       = [azurerm_resource_group.this]
+}
