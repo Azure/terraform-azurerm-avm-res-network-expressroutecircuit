@@ -28,6 +28,8 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.71)
 
+- <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (>= 0.1.8)
+
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 ## Providers
@@ -43,6 +45,8 @@ The following providers are used by this module:
 The following resources are used by this module:
 
 - [azurerm_express_route_circuit.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_circuit) (resource)
+- [azurerm_express_route_circuit_peering.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_circuit_peering) (resource)
+- [azurerm_express_route_connection.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_connection) (resource)
 - [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
 - [azurerm_monitor_diagnostic_setting.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) (resource)
 - [azurerm_resource_group_template_deployment.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group_template_deployment) (resource)
@@ -57,6 +61,12 @@ The following input variables are required:
 
 ### <a name="input_name"></a> [name](#input\_name)
 
+Description:   (Required) The location of the ExpressRoute Circuit. Changing this forces a new resource to be created.
+
+Type: `string`
+
+### <a name="input_peering_location"></a> [peering\_location](#input\_peering\_location)
+
 Description:   (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
 
 Type: `string`
@@ -70,6 +80,7 @@ Type: `string`
 ### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
 
 Description: (Required) The name of the resource group where the resources will be deployed.
+
 
 Type: `string`
 
@@ -127,6 +138,55 @@ Description:   (Optional) The bandwidth in Mbps.
 Type: `number`
 
 Default: `null`
+
+### <a name="input_connections"></a> [connections](#input\_connections)
+
+Description:     (Optional) A map of association objects to create connections between the created circuit and the designated gateways.
+
+    - `connection_name` - (Required) The name of the connection.
+    - `gateway_resource_id` - (Required) The id of the gateway resource, must be supplied in the form of an Azure resource ID.
+
+    Example Input:
+
+    ```terraform
+    connections = {
+      connection1 = {
+        connection_name     = var.connection1-name
+        gateway_resource_id = azurerm_express_route_gateway.example.id
+      },
+      connection2 = {
+        connection_name     = "connection2"
+        gateway_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/Microsoft.Network/expressRouteGateways/myExpressRouteGateway"
+      }
+    }
+    
+```
+
+Type:
+
+```hcl
+map(object({
+    connection_name                      = string
+    gateway_resource_id                  = string
+    express_route_circuit_peering_id     = string
+    authorization_key                    = optional(string, null)
+    enable_internet_security             = optional(bool, false)
+    express_route_gateway_bypass_enabled = optional(bool, false)
+    private_link_fast_path_enabled       = optional(bool, false)
+    routing_weight                       = optional(number, 0)
+    routing = optional(object({
+      associated_route_table_id = string
+      inbound_route_map_id      = string
+      outbound_route_map_id     = string
+      propagated_route_table = object({
+        labels          = list(string)
+        route_table_ids = list(string)
+      })
+    }), null)
+  }))
+```
+
+Default: `{}`
 
 ### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
 
@@ -198,6 +258,7 @@ Default: `true`
 
 ### <a name="input_express_route_port_id"></a> [express\_route\_port\_id](#input\_express\_route\_port\_id)
 
+
 Description:   (Optional) The ID of the ExpressRoute Port.
 
 Type: `string`
@@ -219,16 +280,106 @@ Description: Controls the Resource Lock configuration for this resource. The fol
 - `kind` - (Required) The type of lock. Possible values are `\"CanNotDelete\"` and `\"ReadOnly\"`.
 - `name` - (Optional) The name of the lock. If not specified, a name will be generated based on the `kind` value. Changing this forces the creation of a new resource.
 
+Description:   (Optional) The ID of the ExpressRoute Port.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_peerings"></a> [peerings](#input\_peerings)
+
+Description:     (Optional) A map of association objects to create peerings between the created circuit and the designated gateways.
+
+    - `peering_type` - (Required) The type of peering. Possible values are `AzurePrivatePeering`, `AzurePublicPeering`, and `MicrosoftPeering`.
+    - `vlan_id` - (Required) The VLAN ID for the peering.
+    - `primary_peer_address_prefix` - (Optional) The primary peer address prefix.
+    - `secondary_peer_address_prefix` - (Optional) The secondary peer address prefix.
+    - `ipv4_enabled` - (Optional) Is IPv4 enabled for this peering. Defaults to `true`.
+    - `shared_key` - (Optional) The shared key for the peering.
+    - `peer_asn` - (Optional) The peer ASN.
+    - `route_filter_id` - (Optional) The ID of the route filter to associate with the peering.
+    - `microsoft_peering_config` - (Optional) A map of Microsoft peering configuration settings.
+    - `ipv6` - (Optional) A map of IPv6 peering configuration settings.
+
+    Example Input:
+
+    ```terraform
+    peerings = {
+      PrivatePeering = {
+        peering_type                  = "AzurePrivatePeering"
+        peer_asn                      = 100
+        primary_peer_address_prefix   = "10.0.0.0/30"
+        secondary_peer_address_prefix = "10.0.0.4/30"
+        ipv4_enabled                  = true
+        vlan_id                       = 300
+
+        ipv6 {
+          primary_peer_address_prefix   = "2002:db01::/126"
+          secondary_peer_address_prefix = "2003:db01::/126"
+          enabled                       = true
+        }
+      },
+      MicrosoftPeering = {
+        peering_type                  = "MicrosoftPeering"
+        peer_asn                      = 200
+        primary_peer_address_prefix   = "123.0.0.0/30"
+        secondary_peer_address_prefix = "123.0.0.4/30"
+        ipv4_enabled                  = true
+        vlan_id                       = 400
+
+        microsoft_peering_config {
+          advertised_public_prefixes = ["123.1.0.0/24"]
+        }
+
+        ipv6 {
+          primary_peer_address_prefix   = "2002:db01::/126"
+          secondary_peer_address_prefix = "2003:db01::/126"
+          enabled                       = true
+
+          microsoft_peering {
+            advertised_public_prefixes = ["2002:db01::/126"]
+          }
+        }
+      }
+    }
+```
+
 Type:
 
 ```hcl
-object({
-    kind = string
-    name = optional(string, null)
-  })
+map(object({
+    peering_type = string
+    # express_route_circuit_name  = string
+    # resource_group_name         = string
+    vlan_id                       = number
+    primary_peer_address_prefix   = optional(string, null)
+    secondary_peer_address_prefix = optional(string, null)
+    ipv4_enabled                  = optional(bool, true)
+    shared_key                    = optional(string, null)
+    peer_asn                      = optional(number, null)
+    route_filter_id               = optional(string, null)
+    microsoft_peering_config = optional(object({
+      advertised_public_prefixes = list(string)
+      customer_asn               = optional(number, null)
+      routing_registry_name      = optional(string, "NONE")
+      advertised_communities     = optional(list(string), null)
+    }), null)
+    ipv6 = optional(object({
+      primary_peer_address_prefix   = string
+      secondary_peer_address_prefix = string
+      enabled                       = optional(bool, true)
+      route_filter_id               = optional(string, null)
+      microsoft_peering_config = optional(object({
+        advertised_public_prefixes = list(string)
+        customer_asn               = optional(number, null)
+        routing_registry_name      = optional(string, "NONE")
+        advertised_communities     = optional(list(string), null)
+      }), null)
+    }), null)
+  }))
 ```
 
-Default: `null`
+Default: `{}`
 
 ### <a name="input_role_assignments"></a> [role\_assignments](#input\_role\_assignments)
 
