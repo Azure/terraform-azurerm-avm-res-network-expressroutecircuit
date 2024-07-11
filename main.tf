@@ -2,38 +2,34 @@ data "azurerm_resource_group" "parent" {
   name = var.resource_group_name
 }
 
-# Create connection between the Express Route Circuit and the Express Route Gateways
-resource "azurerm_express_route_connection" "this" {
-  for_each = var.express_route_gateway_resource_ids
 
-  name                             = each.value.connection_name
-  express_route_gateway_id         = each.value.gateway_resource_id
-  express_route_circuit_peering_id = azurerm_express_route_circuit_peering.this.id 
+resource "azurerm_express_route_circuit_peering" "this" {
+  for_each = var.peerings
+
+  express_route_circuit_name    = azurerm_express_route_circuit.this.name
+  peering_type                  = each.value.peering_type
+  resource_group_name           = data.azurerm_resource_group.parent.name
+  vlan_id                       = each.value.vlan_id
+  ipv4_enabled                  = each.value.ipv4_enabled
+  peer_asn                      = each.value.peer_asn
+  primary_peer_address_prefix   = each.value.primary_peer_address_prefix
+  route_filter_id               = each.value.route_filter_id
+  secondary_peer_address_prefix = each.value.secondary_peer_address_prefix
+  shared_key                    = each.value.shared_key
 }
 
-resource "azurerm_express_route_circuit_peering" "example" {
-  peering_type                  = "MicrosoftPeering"
-  express_route_circuit_name    = azurerm_express_route_circuit.example.name
-  resource_group_name           = azurerm_resource_group.example.name
-  peer_asn                      = 100
-  primary_peer_address_prefix   = "123.0.0.0/30"
-  secondary_peer_address_prefix = "123.0.0.4/30"
-  ipv4_enabled                  = true
-  vlan_id                       = 300
+# Create connection between the Express Route Circuit and the Express Route Gateways
+resource "azurerm_express_route_connection" "this" {
+  for_each = var.connections
 
-  microsoft_peering_config {
-    advertised_public_prefixes = ["123.1.0.0/24"]
-  }
-
-  ipv6 {
-    primary_peer_address_prefix   = "2002:db01::/126"
-    secondary_peer_address_prefix = "2003:db01::/126"
-    enabled                       = true
-
-    microsoft_peering {
-      advertised_public_prefixes = ["2002:db01::/126"]
-    }
-  }
+  express_route_circuit_peering_id     = each.value.express_route_circuit_peering_id
+  express_route_gateway_id             = each.value.gateway_resource_id
+  name                                 = each.value.connection_name
+  authorization_key                    = each.value.authorization_key
+  enable_internet_security             = each.value.enable_internet_security
+  express_route_gateway_bypass_enabled = each.value.express_route_gateway_bypass_enabled
+  private_link_fast_path_enabled       = each.value.private_link_fast_path_enabled
+  routing_weight                       = each.value.routing_weight
 }
 
 # required AVM resources interfaces
