@@ -59,13 +59,13 @@ The following resources are used by this module:
 
 The following input variables are required:
 
-### <a name="input_location"></a> [location](#input\_location)
+### <a name="input_name"></a> [name](#input\_name)
 
 Description:   (Required) The location of the ExpressRoute Circuit. Changing this forces a new resource to be created.
 
 Type: `string`
 
-### <a name="input_name"></a> [name](#input\_name)
+### <a name="input_peering_location"></a> [peering\_location](#input\_peering\_location)
 
 Description:   (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
 
@@ -80,6 +80,7 @@ Type: `string`
 ### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
 
 Description: (Required) The name of the resource group where the resources will be deployed.
+
 
 Type: `string`
 
@@ -257,6 +258,7 @@ Default: `true`
 
 ### <a name="input_express_route_port_id"></a> [express\_route\_port\_id](#input\_express\_route\_port\_id)
 
+
 Description:   (Optional) The ID of the ExpressRoute Port.
 
 Type: `string`
@@ -278,14 +280,9 @@ Description: Controls the Resource Lock configuration for this resource. The fol
 - `kind` - (Required) The type of lock. Possible values are `\"CanNotDelete\"` and `\"ReadOnly\"`.
 - `name` - (Optional) The name of the lock. If not specified, a name will be generated based on the `kind` value. Changing this forces the creation of a new resource.
 
-Type:
+Description:   (Optional) The ID of the ExpressRoute Port.
 
-```hcl
-object({
-    kind = string
-    name = optional(string, null)
-  })
-```
+Type: `string`
 
 Default: `null`
 

@@ -20,7 +20,7 @@ resource "azurerm_express_route_circuit_peering" "this" {
 
 # Create connection between the Express Route Circuit and the Express Route Gateways
 resource "azurerm_express_route_connection" "this" {
-  for_each = var.connections
+  for_each = var.express_route_gateway_resource_ids
 
   express_route_circuit_peering_id     = each.value.express_route_circuit_peering_id
   express_route_gateway_id             = each.value.gateway_resource_id
@@ -31,6 +31,7 @@ resource "azurerm_express_route_connection" "this" {
   private_link_fast_path_enabled       = each.value.private_link_fast_path_enabled
   routing_weight                       = each.value.routing_weight
 }
+
 
 # required AVM resources interfaces
 resource "azurerm_management_lock" "this" {

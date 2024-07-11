@@ -1,3 +1,4 @@
+
 variable "location" {
   type        = string
   description = <<DESCRIPTION
@@ -143,6 +144,90 @@ variable "connections" {
   }
 }
 
+variable "location" {
+  type        = string
+  description = <<DESCRIPTION
+  (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
+DESCRIPTION
+  nullable    = false
+}
+
+variable "peering_location" {
+  type        = string
+  description = <<DESCRIPTION
+  (Required) The peering location.
+DESCRIPTION
+  nullable    = false
+}
+
+variable "resource_group_name" {
+  type        = string
+  description = <<DESCRIPTION
+(Required) The name of the resource group where the resources will be deployed. 
+DESCRIPTION  
+  nullable    = false
+}
+
+variable "service_provider_name" {
+  type        = string
+  description = <<DESCRIPTION
+  (Required) The name of the service provider.
+DESCRIPTION
+  nullable    = false
+}
+
+variable "sku" {
+  type = object({
+    tier   = string
+    family = string
+  })
+  description = <<DESCRIPTION
+  (Required) The SKU of the ExpressRoute Circuit.
+DESCRIPTION
+  nullable    = false
+
+  validation {
+    condition     = contains(["Local", "Standard", "Premium"], var.sku.tier)
+    error_message = "The SKU tier must be either 'Local', 'Standard', or 'Premium'."
+  }
+  validation {
+    condition     = contains(["MeteredData", "UnlimitedData"], var.sku.family)
+    error_message = "The SKU family must be either 'MeteredData' or 'UnlimitedData'."
+  }
+}
+
+variable "allow_classic_operations" {
+  type        = bool
+  default     = false
+  description = <<DESCRIPTION
+  (Optional) Allow classic operations.
+DESCRIPTION
+}
+
+variable "authorization_key" {
+  type        = string
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) The authorization key of the ExpressRoute Circuit.
+DESCRIPTION
+}
+
+variable "bandwidth_in_gbps" {
+  type        = number
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) The bandwidth in Gbps.
+DESCRIPTION
+}
+
+variable "bandwidth_in_mbps" {
+  type        = number
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) The bandwidth in Mbps.
+DESCRIPTION
+}
+
 # required AVM interfaces
 # remove only if not supported by the resource
 # tflint-ignore: terraform_unused_declarations
@@ -255,6 +340,7 @@ DESCRIPTION
     error_message = "The lock level must be one of: 'None', 'CanNotDelete', or 'ReadOnly'."
   }
 }
+
 
 variable "peerings" {
   type = map(object({
