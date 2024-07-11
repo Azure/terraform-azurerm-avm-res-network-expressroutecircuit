@@ -57,7 +57,7 @@ resource "azurerm_resource_group" "this" {
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
-module "test" {
+module "exr_circuit_test" {
   source                = "../../"
   resource_group_name   = azurerm_resource_group.this.name
   name                  = module.naming.express_route_circuit.name
