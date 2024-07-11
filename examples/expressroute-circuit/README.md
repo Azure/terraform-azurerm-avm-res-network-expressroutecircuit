@@ -22,6 +22,16 @@ provider "azurerm" {
   features {}
 }
 
+locals {
+  bandwidth_in_mbps     = 50
+  family                = "UnlimitedData"
+  location              = "East US"
+  peering_location      = "Silicon Valley"
+  resource_group_name   = "rg-exr-circuit"
+  service_provider_name = "Equinix"
+  tier                  = "Standard"
+}
+
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
@@ -45,15 +55,30 @@ module "naming" {
 
 # This is required for resource modules
 resource "azurerm_resource_group" "this" {
-  location = module.regions.regions[random_integer.region_index.result].name
-  name     = module.naming.resource_group.name_unique
+  location = local.location
+  name     = local.resource_group_name
 }
 
 # This is the module call
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
+module "test" {
+  source                = "../../"
+  resource_group_name   = azurerm_resource_group.this.name
+  name                  = module.naming.express_route_circuit.name
+  service_provider_name = local.service_provider_name
+  peering_location      = local.peering_location
+  bandwidth_in_mbps     = local.bandwidth_in_mbps
 
+  sku = {
+    tier   = local.tier
+    family = local.family
+  }
+
+  enable_telemetry = var.enable_telemetry # see variables.tf
+  depends_on       = [azurerm_resource_group.this]
+}
 ```
 
 <!-- markdownlint-disable MD033 -->
@@ -89,7 +114,17 @@ No required inputs.
 
 ## Optional Inputs
 
-No optional inputs.
+The following input variables are optional (have default values):
+
+### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
+
+Description: This variable controls whether or not telemetry is enabled for the module.  
+For more information see <https://aka.ms/avm/telemetryinfo>.  
+If it is set to false, then no telemetry will be collected.
+
+Type: `bool`
+
+Default: `true`
 
 ## Outputs
 
@@ -110,6 +145,12 @@ Version: ~> 0.3
 Source: Azure/regions/azurerm
 
 Version: ~> 0.3
+
+### <a name="module_test"></a> [test](#module\_test)
+
+Source: ../../
+
+Version:
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
