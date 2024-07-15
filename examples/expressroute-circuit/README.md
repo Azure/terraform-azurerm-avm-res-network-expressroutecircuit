@@ -72,7 +72,6 @@ module "exr_circuit_test" {
   bandwidth_in_mbps     = local.bandwidth_in_mbps
   location              = local.location
 
-
   sku = {
     tier   = local.tier
     family = local.family
