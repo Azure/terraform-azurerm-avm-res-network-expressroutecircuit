@@ -21,7 +21,7 @@ locals {
   family                = "UnlimitedData"
   location              = "East US"
   peering_location      = "Silicon Valley"
-  resource_group_name   = "rg-exr-circuit"
+  resource_group_name   = "test-erc"
   service_provider_name = "Equinix"
   tier                  = "Standard"
 }
@@ -64,6 +64,7 @@ module "exr_circuit_test" {
   service_provider_name = local.service_provider_name
   peering_location      = local.peering_location
   bandwidth_in_mbps     = local.bandwidth_in_mbps
+  location              = local.location
 
   sku = {
     tier   = local.tier
