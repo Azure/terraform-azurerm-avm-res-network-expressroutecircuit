@@ -351,9 +351,3 @@ variable "tags" {
   default     = null
   description = "(Optional) Tags of the resource."
 }
-
-variable "telemetry_resource_group_name" {
-  type        = string
-  default     = ""
-  description = "The resource group where the telemetry will be deployed."
-}

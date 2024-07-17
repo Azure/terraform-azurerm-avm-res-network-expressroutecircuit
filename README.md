@@ -376,14 +376,6 @@ Type: `map(string)`
 
 Default: `null`
 
-### <a name="input_telemetry_resource_group_name"></a> [telemetry\_resource\_group\_name](#input\_telemetry\_resource\_group\_name)
-
-Description: The resource group where the telemetry will be deployed.
-
-Type: `string`
-
-Default: `""`
-
 ## Outputs
 
 The following outputs are exported:
