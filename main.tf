@@ -19,18 +19,18 @@ resource "azurerm_express_route_circuit_peering" "this" {
 }
 
 # Create connection between the Express Route Circuit and the Express Route Gateways
-resource "azurerm_express_route_connection" "this" {
-  for_each = var.express_route_gateway_resource_ids
+# resource "azurerm_express_route_connection" "this" {
+#   for_each = var.express_route_gateway_resource_ids
 
-  express_route_circuit_peering_id     = each.value.express_route_circuit_peering_id
-  express_route_gateway_id             = each.value.gateway_resource_id
-  name                                 = each.value.connection_name
-  authorization_key                    = each.value.authorization_key
-  enable_internet_security             = each.value.enable_internet_security
-  express_route_gateway_bypass_enabled = each.value.express_route_gateway_bypass_enabled
-  private_link_fast_path_enabled       = each.value.private_link_fast_path_enabled
-  routing_weight                       = each.value.routing_weight
-}
+#   express_route_circuit_peering_id     = each.value.express_route_circuit_peering_id
+#   express_route_gateway_id             = each.value.gateway_resource_id
+#   name                                 = each.value.connection_name
+#   authorization_key                    = each.value.authorization_key
+#   enable_internet_security             = each.value.enable_internet_security
+#   express_route_gateway_bypass_enabled = each.value.express_route_gateway_bypass_enabled
+#   private_link_fast_path_enabled       = each.value.private_link_fast_path_enabled
+#   routing_weight                       = each.value.routing_weight
+# }
 
 
 # required AVM resources interfaces

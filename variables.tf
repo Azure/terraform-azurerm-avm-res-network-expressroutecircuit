@@ -1,4 +1,3 @@
-
 variable "location" {
   type        = string
   description = <<DESCRIPTION
@@ -13,143 +12,6 @@ variable "name" {
   description = <<DESCRIPTION
   (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
 DESCRIPTION
-}
-
-variable "peering_location" {
-  type        = string
-  description = <<DESCRIPTION
-  (Required) The peering location.
-DESCRIPTION
-  nullable    = false
-}
-
-variable "resource_group_name" {
-  type        = string
-  description = <<DESCRIPTION
-(Required) The name of the resource group where the resources will be deployed. 
-DESCRIPTION  
-  nullable    = false
-}
-
-variable "service_provider_name" {
-  type        = string
-  description = <<DESCRIPTION
-  (Required) The name of the service provider.
-DESCRIPTION
-  nullable    = false
-}
-
-variable "sku" {
-  type = object({
-    tier   = string
-    family = string
-  })
-  description = <<DESCRIPTION
-  (Required) The SKU of the ExpressRoute Circuit.
-DESCRIPTION
-  nullable    = false
-
-  validation {
-    condition     = contains(["Local", "Standard", "Premium"], var.sku.tier)
-    error_message = "The SKU tier must be either 'Local', 'Standard', or 'Premium'."
-  }
-  validation {
-    condition     = contains(["MeteredData", "UnlimitedData"], var.sku.family)
-    error_message = "The SKU family must be either 'MeteredData' or 'UnlimitedData'."
-  }
-}
-
-variable "allow_classic_operations" {
-  type        = bool
-  default     = false
-  description = <<DESCRIPTION
-  (Optional) Allow classic operations.
-DESCRIPTION
-}
-
-variable "authorization_key" {
-  type        = string
-  default     = null
-  description = <<DESCRIPTION
-  (Optional) The authorization key of the ExpressRoute Circuit.
-DESCRIPTION
-}
-
-variable "bandwidth_in_gbps" {
-  type        = number
-  default     = null
-  description = <<DESCRIPTION
-  (Optional) The bandwidth in Gbps.
-DESCRIPTION
-}
-
-variable "bandwidth_in_mbps" {
-  type        = number
-  default     = null
-  description = <<DESCRIPTION
-  (Optional) The bandwidth in Mbps.
-DESCRIPTION
-}
-
-variable "connections" {
-  type = map(object({
-    connection_name                      = string
-    gateway_resource_id                  = string
-    express_route_circuit_peering_id     = string
-    authorization_key                    = optional(string, null)
-    enable_internet_security             = optional(bool, false)
-    express_route_gateway_bypass_enabled = optional(bool, false)
-    private_link_fast_path_enabled       = optional(bool, false)
-    routing_weight                       = optional(number, 0)
-    routing = optional(object({
-      associated_route_table_id = string
-      inbound_route_map_id      = string
-      outbound_route_map_id     = string
-      propagated_route_table = object({
-        labels          = list(string)
-        route_table_ids = list(string)
-      })
-    }), null)
-  }))
-  default     = {}
-  description = <<DESCRIPTION
-    (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
-
-    - `connection_name` - (Required) The name of the connection.
-    - `gateway_resource_id` - (Required) The id of the gateway resource, must be supplied in the form of an Azure resource ID.
-
-    Example Input:
-
-    ```terraform
-    connections = {
-      connection1 = {
-        connection_name     = var.connection1-name
-        gateway_resource_id = azurerm_express_route_gateway.example.id
-      },
-      connection2 = {
-        connection_name     = "connection2"
-        gateway_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/Microsoft.Network/expressRouteGateways/myExpressRouteGateway"
-      }
-    }
-    ```
-  DESCRIPTION
-
-  validation {
-    condition     = alltrue([for connection in var.connections : can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/[^/]+/[^/]+$", connection.gateway_resource_id))])
-    error_message = "If next_hop_type is not VirtualAppliance, next_hop_in_ip_address must be null."
-  }
-  validation {
-    condition     = alltrue([for connection in var.connections : connection.weight >= 0 && connection.weight <= 32000])
-    error_message = "If next_hop_type is not VirtualAppliance, next_hop_in_ip_address must be null."
-  }
-}
-
-variable "location" {
-  type        = string
-  description = <<DESCRIPTION
-  (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
-DESCRIPTION
-  nullable    = false
 }
 
 variable "peering_location" {
@@ -340,7 +202,6 @@ DESCRIPTION
     error_message = "The lock level must be one of: 'None', 'CanNotDelete', or 'ReadOnly'."
   }
 }
-
 
 variable "peerings" {
   type = map(object({
