@@ -203,14 +203,103 @@ DESCRIPTION
   }
 }
 
-variable "connections" {
+variable express_route_circuit_authorizations {
   type = map(object({
-    connection_name     = string
-    gateway_resource_id = string
+    name              = string
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+    (Optional) A map of authorization objects to create authorizations for the ExpressRoute Circuits. 
+
+    - `name` - (Required) The name of the authorization.
+
+    Example Input:
+
+```terraform
+    express_route_circuit_authorizations = {
+      authorization1 = {
+        name              = "authorization1"
+      },
+      authorization2 = {
+        name              = "azurerm_express_route_gateway.some_gateway.name-authorization" 
+      }
+    }
+```
+  DESCRIPTION
+}
+
+variable "vnet_gw_connections" { # validate variables, add example and validation
+  type = map(object({
+    name     = string
+    resource_group_name = string
+    location            = string
+    virtual_network_gateway_id = string
     authorization_key = optional(string, null)
+    dpd_timeout_seconds = optional(integer, 45) # Is this required?
+    express_route_circuit_id = string
+    routing_weight = optional(number, 10)
+    express_route_gateway_bypass = optional(bool, false)
+    private_link_fast_path_enabled = optional(bool, false)
+    tags = optional(map(string), null)
+
+    #type - defaults to "ExpressRoute"
+    #peer_virtual_network_gateway_id
+    #local_azure_ip_address_enabled
+    #local_network_gateway_id
+    #shared_key
+    #connection_mode
+    #connection_protocol
+    #enable_bgp
+    #custom_bgp_addresses
+    #egress_nat_rule_ids
+    #ingress_nat_rule_ids
+    #use_policy_based_traffic_selectors
+    #ipsec_policy
+    #traffic_selector_policy
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+    (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
+
+    - `connection_name` - (Required) The name of the connection.
+    - `gateway_resource_id` - (Required) The id of the gateway resource, must be supplied in the form of an Azure resource ID.
+
+    Example Input:
+
+    ```terraform
+    connections = {
+      connection1 = {
+        connection_name     = var.connection1-name
+        gateway_resource_id = azurerm_express_route_gateway.example.id
+      },
+      connection2 = {
+        connection_name     = "connection2"
+        gateway_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/Microsoft.Network/expressRouteGateways/myExpressRouteGateway"
+      }
+    }
+    ```
+  DESCRIPTION
+
+  # validation {
+  #   condition     = alltrue([for connection in var.connections : can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/[^/]+/[^/]+$", connection.gateway_resource_id >= 0))])
+  #   error_message = "gateway_resource_id must be in the form of an Azure resource ID."
+  # }
+  validation {
+    condition     = alltrue([for connection in var.vnet_gw_connections : connection.routing_weight >= 0 && connection.routing_weight <= 32000])
+    error_message = "routing_weight must be between 0 and 32000."
+  }
+}
+
+variable "er_gw_connections" { # variables checked, add example and validation, dynamic deploy of routing
+  type = map(object({
+    name     = string
+    express_route_circuit_peering_id = string
+    express_route_gateway_id = string
+    authorization_key = optional(string, null)
+    
     enable_internet_security = optional(bool, false)
     express_route_gateway_bypass_enabled = optional(bool, false)
-    private_link_fast_path_enabled = optional(bool, false)
+    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
     routing_weight = optional(number, 0)
     routing = optional(object({
       associated_route_table_id = string
@@ -245,21 +334,19 @@ variable "connections" {
     ```
   DESCRIPTION
 
+  # validation {
+  #   condition     = alltrue([for connection in var.connections : can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/[^/]+/[^/]+$", connection.gateway_resource_id >= 0))])
+  #   error_message = "gateway_resource_id must be in the form of an Azure resource ID."
+  # }
   validation {
-    condition = can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/[^/]+/[^/]+$", var.connections[*].gateway_resource_id))
-    error_message = "gateway_resource_id must be in the form of an Azure resource ID."
-  }
-  validation {
-    condition = var.connections[*].routing_weight >= 0 && var.connections[*].routing_weight <= 32000
+    condition     = alltrue([for connection in var.er_gw_connections : connection.routing_weight >= 0 && connection.routing_weight <= 32000])
     error_message = "routing_weight must be between 0 and 32000."
   }
 }
 
 variable "peerings" {
   type = map(object({
-    peering_type = string
-    # express_route_circuit_name  = string
-    # resource_group_name         = string
+    peering_type                  = string
     vlan_id                       = number
     primary_peer_address_prefix   = optional(string, null)
     secondary_peer_address_prefix = optional(string, null)
@@ -278,8 +365,8 @@ variable "peerings" {
       secondary_peer_address_prefix = string
       enabled                       = optional(bool, true)
       route_filter_id               = optional(string, null)
-      microsoft_peering_config = optional(object({
-        advertised_public_prefixes = list(string)
+      microsoft_peering = optional(object({
+        advertised_public_prefixes = optional(list(string))
         customer_asn               = optional(number, null)
         routing_registry_name      = optional(string, "NONE")
         advertised_communities     = optional(list(string), null)
