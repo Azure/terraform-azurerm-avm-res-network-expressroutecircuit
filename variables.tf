@@ -203,6 +203,58 @@ DESCRIPTION
   }
 }
 
+variable "connections" {
+  type = map(object({
+    connection_name     = string
+    gateway_resource_id = string
+    authorization_key = optional(string, null)
+    enable_internet_security = optional(bool, false)
+    express_route_gateway_bypass_enabled = optional(bool, false)
+    private_link_fast_path_enabled = optional(bool, false)
+    routing_weight = optional(number, 0)
+    routing = optional(object({
+      associated_route_table_id = string
+      inbound_route_map_id = string
+      outbound_route_map_id = string
+      propagated_route_table = object({
+        labels = list(string)
+        route_table_ids = list(string)
+      })
+    }), null)
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+    (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
+
+    - `connection_name` - (Required) The name of the connection.
+    - `gateway_resource_id` - (Required) The id of the gateway resource, must be supplied in the form of an Azure resource ID.
+
+    Example Input:
+
+    ```terraform
+    connections = {
+      connection1 = {
+        connection_name     = var.connection1-name
+        gateway_resource_id = azurerm_express_route_gateway.example.id
+      },
+      connection2 = {
+        connection_name     = "connection2"
+        gateway_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/Microsoft.Network/expressRouteGateways/myExpressRouteGateway"
+      }
+    }
+    ```
+  DESCRIPTION
+
+  validation {
+    condition = can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/[^/]+/[^/]+$", var.connections[*].gateway_resource_id))
+    error_message = "gateway_resource_id must be in the form of an Azure resource ID."
+  }
+  validation {
+    condition = var.connections[*].routing_weight >= 0 && var.connections[*].routing_weight <= 32000
+    error_message = "routing_weight must be between 0 and 32000."
+  }
+}
+
 variable "peerings" {
   type = map(object({
     peering_type = string
