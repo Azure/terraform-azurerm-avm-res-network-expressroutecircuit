@@ -235,26 +235,10 @@ variable "vnet_gw_connections" { # validate variables, add example and validatio
     location                       = string
     virtual_network_gateway_id     = string
     authorization_key              = optional(string, null)
-    routing_weight                 = optional(number, 10)
+    routing_weight                 = optional(number, 0)
     express_route_gateway_bypass   = optional(bool, false)
-    private_link_fast_path_enabled = optional(bool, false)
+    #private_link_fast_path_enabled = optional(bool, false) # Unable to test parameter due to bug #26746, parameter disabled until we solve the issue
     tags                           = optional(map(string), null)
-    #express_route_circuit_id = string
-    #dpd_timeout_seconds = optional(number, 45) # Do we need a dpd in the variables?
-    #type - defaults to "ExpressRoute"
-    #peer_virtual_network_gateway_id
-    #local_azure_ip_address_enabled
-    #local_network_gateway_id
-    #shared_key
-    #connection_mode
-    #connection_protocol
-    #enable_bgp
-    #custom_bgp_addresses
-    #egress_nat_rule_ids
-    #ingress_nat_rule_ids
-    #use_policy_based_traffic_selectors
-    #ipsec_policy
-    #traffic_selector_policy
   }))
   default     = {}
   description = <<DESCRIPTION
@@ -292,21 +276,22 @@ variable "vnet_gw_connections" { # validate variables, add example and validatio
 variable "er_gw_connections" { # variables checked, add example and validation, dynamic deploy of routing
   type = map(object({
     name                             = string
-    express_route_circuit_peering_id = string # How to provide the peering ID?
+    express_route_circuit_peering_id = optional(string,null) # Use this if you know the id of the peering
+    peering_map_key                  = optional(string, "null") # Alternate for "express_route_circuit_peering_id", use when the peering is created in the same module and you know the key of the peering map (see example below) 
     express_route_gateway_id         = string
     authorization_key                = optional(string, null)
-
+    
     enable_internet_security             = optional(bool, false)
     express_route_gateway_bypass_enabled = optional(bool, false)
     #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
     routing_weight = optional(number, 0)
     routing = optional(object({
-      associated_route_table_id = string
-      inbound_route_map_id      = string
-      outbound_route_map_id     = string
+      associated_route_table_id = optional(string)
+      inbound_route_map_id      = optional(string)
+      outbound_route_map_id     = optional(string)
       propagated_route_table = object({
-        labels          = list(string)
-        route_table_ids = list(string)
+        labels          = optional(list(string),null)
+        route_table_ids = optional(list(string),null)
       })
     }), null)
   }))

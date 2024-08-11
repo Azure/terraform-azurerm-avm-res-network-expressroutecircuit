@@ -66,7 +66,11 @@ resource "azurerm_virtual_network_gateway_connection" "this" {
   type                       = "ExpressRoute"
   virtual_network_gateway_id = each.value.virtual_network_gateway_id
   express_route_circuit_id   = azurerm_express_route_circuit.this.id
-  # TODO: complete rest of the properties
+  authorization_key = each.value.authorization_key
+  routing_weight    = each.value.routing_weight
+  express_route_gateway_bypass = each.value.express_route_gateway_bypass
+  #private_link_fast_path_enabled = each.value.private_link_fast_path_enabled # Unable to test parameter due to bug #26746, parameter disabled until we solve the issue
+  #TODO:  Add validation on parameters
 }
 
 resource "azurerm_express_route_connection" "this" {
@@ -74,11 +78,32 @@ resource "azurerm_express_route_connection" "this" {
 
   name                                 = each.value.name
   express_route_gateway_id             = each.value.express_route_gateway_id
-  express_route_circuit_peering_id     = azurerm_express_route_circuit_peering.this["firstPeeringConfig"].id
+  express_route_circuit_peering_id     = coalesce(each.value.express_route_circuit_peering_id, try(azurerm_express_route_circuit_peering.this[each.value.peering_map_key].id,"")) 
   express_route_gateway_bypass_enabled = false
-  #TODO: complete rest of the properties
-}
+  #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
+  routing_weight = each.value.routing_weight
 
+  dynamic "routing" {
+    for_each = each.value.routing != null ? [each.value.routing] : []
+
+    content {
+      associated_route_table_id = routing.value.associated_route_table_id
+      inbound_route_map_id      = routing.value.inbound_route_map_id
+      outbound_route_map_id     = routing.value.outbound_route_map_id
+
+      dynamic "propagated_route_table" {
+        for_each = routing.value.propagated_route_table != null ? [routing.value.propagated_route_table] : []
+
+        content {
+          labels          = propagated_route_table.value.labels
+          route_table_ids = propagated_route_table.value.route_table_ids
+        }
+      }
+    }
+  }
+  #TODO: Add validation on parameters
+    # Validate that either express_route_circuit_peering_id or peering_map_key is set and
+} 
 
 # required AVM resources interfaces
 resource "azurerm_management_lock" "this" {
