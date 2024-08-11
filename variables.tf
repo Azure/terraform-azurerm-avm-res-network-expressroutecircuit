@@ -203,9 +203,9 @@ DESCRIPTION
   }
 }
 
-variable express_route_circuit_authorizations {
+variable "express_route_circuit_authorizations" {
   type = map(object({
-    name              = string
+    name = string
   }))
   default     = {}
   description = <<DESCRIPTION
@@ -230,18 +230,17 @@ variable express_route_circuit_authorizations {
 
 variable "vnet_gw_connections" { # validate variables, add example and validation
   type = map(object({
-    name     = string
-    resource_group_name = string
-    location            = string
-    virtual_network_gateway_id = string
-    authorization_key = optional(string, null)
-    dpd_timeout_seconds = optional(integer, 45) # Is this required?
-    express_route_circuit_id = string
-    routing_weight = optional(number, 10)
-    express_route_gateway_bypass = optional(bool, false)
+    name                           = string
+    resource_group_name            = string
+    location                       = string
+    virtual_network_gateway_id     = string
+    authorization_key              = optional(string, null)
+    routing_weight                 = optional(number, 10)
+    express_route_gateway_bypass   = optional(bool, false)
     private_link_fast_path_enabled = optional(bool, false)
-    tags = optional(map(string), null)
-
+    tags                           = optional(map(string), null)
+    #express_route_circuit_id = string
+    #dpd_timeout_seconds = optional(number, 45) # Do we need a dpd in the variables?
     #type - defaults to "ExpressRoute"
     #peer_virtual_network_gateway_id
     #local_azure_ip_address_enabled
@@ -292,21 +291,21 @@ variable "vnet_gw_connections" { # validate variables, add example and validatio
 
 variable "er_gw_connections" { # variables checked, add example and validation, dynamic deploy of routing
   type = map(object({
-    name     = string
-    express_route_circuit_peering_id = string
-    express_route_gateway_id = string
-    authorization_key = optional(string, null)
-    
-    enable_internet_security = optional(bool, false)
+    name                             = string
+    express_route_circuit_peering_id = string # How to provide the peering ID?
+    express_route_gateway_id         = string
+    authorization_key                = optional(string, null)
+
+    enable_internet_security             = optional(bool, false)
     express_route_gateway_bypass_enabled = optional(bool, false)
     #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
     routing_weight = optional(number, 0)
     routing = optional(object({
       associated_route_table_id = string
-      inbound_route_map_id = string
-      outbound_route_map_id = string
+      inbound_route_map_id      = string
+      outbound_route_map_id     = string
       propagated_route_table = object({
-        labels = list(string)
+        labels          = list(string)
         route_table_ids = list(string)
       })
     }), null)

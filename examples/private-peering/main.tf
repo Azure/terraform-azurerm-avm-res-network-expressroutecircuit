@@ -79,56 +79,57 @@ module "exr_circuit_test" {
       secondary_peer_address_prefix = "10.0.0.4/30"
       ipv4_enabled                  = true
       vlan_id                       = 300
-      
-      # ipv6 = { 
-      #   primary_peer_address_prefix   = "2002:db01::/126"
-      #   secondary_peer_address_prefix = "2003:db01::/126"
-      #   enabled                       = true
-      # }
-    },
-    secondPeeringConfig = {
-      peering_type                  = "MicrosoftPeering"
-      peer_asn                      = 200
-      primary_peer_address_prefix   = "123.0.0.0/30"
-      secondary_peer_address_prefix = "123.0.0.4/30"
-      ipv4_enabled                  = true
-      vlan_id                       = 400
 
-      microsoft_peering_config = {
-        advertised_public_prefixes = ["123.1.0.0/24"]
+      ipv6 = {
+        primary_peer_address_prefix   = "2002:db01::/126"
+        secondary_peer_address_prefix = "2003:db01::/126"
+        enabled                       = true
       }
-
-      # ipv6 = {
-      #   primary_peer_address_prefix   = "2002:db01::/126"
-      #   secondary_peer_address_prefix = "2003:db01::/126"
-      #   enabled                       = true
-
-      #   microsoft_peering = {
-      #     advertised_public_prefixes = ["2002:db01::/126"]
-      #   }
-      # }
     }
+    # ,
+    # secondPeeringConfig = {
+    #   peering_type                  = "MicrosoftPeering"
+    #   peer_asn                      = 200
+    #   primary_peer_address_prefix   = "123.0.0.0/30"
+    #   secondary_peer_address_prefix = "123.0.0.4/30"
+    #   ipv4_enabled                  = true
+    #   vlan_id                       = 400
+
+    #   microsoft_peering_config = {
+    #     advertised_public_prefixes = ["123.1.0.0/24"]
+    #   }
+
+    #   ipv6 = {
+    #     primary_peer_address_prefix   = "2002:db01::/126"
+    #     secondary_peer_address_prefix = "2003:db01::/126"
+    #     enabled                       = true
+
+    #     microsoft_peering = {
+    #       advertised_public_prefixes = ["2002:db01::/126"]
+    #     }
+    #   }
+    # }
   }
 
   express_route_circuit_authorizations = {
     authorization1 = {
-      name              = "authorization1"
+      name = "authorization1"
     }
   }
 
   vnet_gw_connections = {
     connection1gw = {
-      connection_name     = local.same_rg_conn_name
-      gateway_resource_id = local.same_rg_gw_id
-      location            = local.location
-      resource_group_name = local.resource_group_name
+      name                       = local.same_rg_conn_name
+      virtual_network_gateway_id = local.same_rg_gw_id
+      location                   = local.location
+      resource_group_name        = local.resource_group_name
     }
   }
 
   er_gw_connections = {
     connection1er = {
-      connection_name     = "ExRConnection-westus2-er"
-      gateway_resource_id = local.same_rg_er_gw_id
+      name                             = "ExRConnection-westus2-er"
+      express_route_gateway_id         = local.same_rg_er_gw_id
       express_route_circuit_peering_id = local.same_rg_er_gw_id
     }
   }

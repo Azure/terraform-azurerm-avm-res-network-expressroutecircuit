@@ -21,19 +21,19 @@ resource "azurerm_express_route_circuit_peering" "this" {
   route_filter_id               = each.value.route_filter_id
   secondary_peer_address_prefix = each.value.secondary_peer_address_prefix
   shared_key                    = each.value.shared_key
-  
-  dynamic ipv6 {
+
+  dynamic "ipv6" {
     for_each = each.value.ipv6 != null ? [each.value.ipv6] : []
-    
+
     content {
       enabled                       = each.value.ipv6.enabled
       primary_peer_address_prefix   = each.value.ipv6.primary_peer_address_prefix
       secondary_peer_address_prefix = each.value.ipv6.secondary_peer_address_prefix
       route_filter_id               = each.value.ipv6.route_filter_id
-      
+
       dynamic "microsoft_peering" {
         for_each = each.value.ipv6.microsoft_peering != null ? [each.value.ipv6.microsoft_peering_config] : []
-        
+
         content {
           advertised_public_prefixes = each.value.ipv6.microsoft_peering.advertised_public_prefixes
           customer_asn               = each.value.ipv6.microsoft_peering.customer_asn
@@ -44,9 +44,9 @@ resource "azurerm_express_route_circuit_peering" "this" {
     }
   }
 
-  dynamic microsoft_peering_config {
+  dynamic "microsoft_peering_config" {
     for_each = each.value.microsoft_peering_config != null ? [each.value.microsoft_peering_config] : []
-    
+
     content {
       advertised_public_prefixes = each.value.microsoft_peering_config.advertised_public_prefixes
       customer_asn               = each.value.microsoft_peering_config.customer_asn
@@ -60,21 +60,23 @@ resource "azurerm_express_route_circuit_peering" "this" {
 resource "azurerm_virtual_network_gateway_connection" "this" {
   for_each = var.vnet_gw_connections
 
-  name                                 = each.value.connection_name
-  resource_group_name                  = each.value.resource_group_name
-  location                             = each.value.location
-  type                                 = "ExpressRoute"
-  virtual_network_gateway_id           = each.value.gateway_resource_id
-  express_route_circuit_id             = azurerm_express_route_circuit.this.id
+  name                       = each.value.name
+  resource_group_name        = each.value.resource_group_name
+  location                   = each.value.location
+  type                       = "ExpressRoute"
+  virtual_network_gateway_id = each.value.virtual_network_gateway_id
+  express_route_circuit_id   = azurerm_express_route_circuit.this.id
+  # TODO: complete rest of the properties
 }
 
 resource "azurerm_express_route_connection" "this" {
   for_each = var.er_gw_connections
 
-  name                             = each.value.connection_name #"ExRConnection-westus2-1722794240077"#
-  express_route_gateway_id         = each.value.gateway_resource_id #"/subscriptions/4bffbb15-d414-4874-a2e4-c548c6d45e2a/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/56baea672a39485b969fdd25f5832098-westus2-er-gw"#
-  express_route_circuit_peering_id = azurerm_express_route_circuit_peering.this["firstPeeringConfig"].id
+  name                                 = each.value.name
+  express_route_gateway_id             = each.value.express_route_gateway_id
+  express_route_circuit_peering_id     = azurerm_express_route_circuit_peering.this["firstPeeringConfig"].id
   express_route_gateway_bypass_enabled = false
+  #TODO: complete rest of the properties
 }
 
 
