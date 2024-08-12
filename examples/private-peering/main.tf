@@ -128,40 +128,27 @@ module "exr_circuit_test" {
     }
   }
 
-
-#  routing = optional(object({
-#       associated_route_table_id = string
-#       inbound_route_map_id      = string
-#       outbound_route_map_id     = string
-#       propagated_route_table = object({
-#         labels          = list(string)
-#         route_table_ids = list(string)
-#       })
-#     }), null)
-
-
-
   er_gw_connections = {
     connection1er = {
       name                             = "ExRConnection-westus2-er"
       express_route_gateway_id         = local.same_rg_er_gw_id
-      #express_route_circuit_peering_id = local.same_rg_er_peering_id
-      peering_map_key = "firstPeeringConfig"
+      express_route_circuit_peering_id = local.same_rg_er_peering_id
+      #peering_map_key = "firstPeeringConfig"
       routeting_weight = 0
       routing = {
         #associated_route_table_id    = azurerm_virtual_hub_route_table.example.id
-        inbound_route_map_id         = azurerm_route_map.in.id
-        outbound_route_map_id        = azurerm_route_map.out.id
+        inbound_route_map_id  = azurerm_route_map.in.id
+        outbound_route_map_id = azurerm_route_map.out.id
         propagated_route_table = {
           route_table_ids = [
             azurerm_virtual_hub_route_table.example.id,
             azurerm_virtual_hub_route_table.additional.id
           ]
         }
-        static_routes = {
-          address_prefix = "10.1.0.0/16"
-          next_hop_type  = "VirtualNetworkGateway"
-        }
+        # static_routes = {
+        #   address_prefix = "10.1.0.0/16"
+        #   next_hop_type  = "VirtualNetworkGateway"
+        # }
       }
     }
   }
@@ -170,13 +157,13 @@ module "exr_circuit_test" {
 
 # Create a Route Table (Primary)
 resource "azurerm_virtual_hub_route_table" "example" {
-  name                = "example-route-table"
+  name           = "example-route-table"
   virtual_hub_id = local.vwh_id
 }
 
 # Create an additional Route Table (Propagated)
 resource "azurerm_virtual_hub_route_table" "additional" {
-  name                = "additional-route-table"
+  name           = "additional-route-table"
   virtual_hub_id = local.vwh_id
 }
 
