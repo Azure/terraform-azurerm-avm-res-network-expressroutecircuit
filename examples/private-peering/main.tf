@@ -21,15 +21,15 @@ locals {
   bandwidth_in_mbps     = 50
   family                = "MeteredData"
   location              = "West US 2"
+  name                  = "SEA-Cust10-ER"
   peering_location      = "Seattle"
   resource_group_name   = "SEA-Cust10"
-  service_provider_name = "Equinix"
-  tier                  = "Premium"
-  name                  = "SEA-Cust10-ER"
   same_rg_conn_name     = "same_rg_connection"
-  same_rg_gw_id         = "/subscriptions/4bffbb15-d414-4874-a2e4-c548c6d45e2a/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
   same_rg_er_gw_id      = "/subscriptions/4bffbb15-d414-4874-a2e4-c548c6d45e2a/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/56baea672a39485b969fdd25f5832098-westus2-er-gw"
   same_rg_er_peering_id = "/subscriptions/4bffbb15-d414-4874-a2e4-c548c6d45e2a/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
+  same_rg_gw_id         = "/subscriptions/4bffbb15-d414-4874-a2e4-c548c6d45e2a/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
+  service_provider_name = "Equinix"
+  tier                  = "Premium"
   vwh_id                = "/subscriptions/4bffbb15-d414-4874-a2e4-c548c6d45e2a/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
 }
 
@@ -116,6 +116,9 @@ module "exr_circuit_test" {
   express_route_circuit_authorizations = {
     authorization1 = {
       name = "authorization1"
+    },
+    authorization2 = {
+      name = "authorization2"
     }
   }
 
@@ -133,10 +136,9 @@ module "exr_circuit_test" {
       name                             = "ExRConnection-westus2-er"
       express_route_gateway_id         = local.same_rg_er_gw_id
       express_route_circuit_peering_id = local.same_rg_er_peering_id
-      #peering_map_key = "firstPeeringConfig"
-      routeting_weight = 0
+      peering_map_key                  = "firstPeeringConfig"
+      routeting_weight                 = 0
       routing = {
-        #associated_route_table_id    = azurerm_virtual_hub_route_table.example.id
         inbound_route_map_id  = azurerm_route_map.in.id
         outbound_route_map_id = azurerm_route_map.out.id
         propagated_route_table = {
@@ -145,10 +147,6 @@ module "exr_circuit_test" {
             azurerm_virtual_hub_route_table.additional.id
           ]
         }
-        # static_routes = {
-        #   address_prefix = "10.1.0.0/16"
-        #   next_hop_type  = "VirtualNetworkGateway"
-        # }
       }
     }
   }
@@ -183,7 +181,6 @@ resource "azurerm_route_map" "in" {
         as_path = ["22334"]
       }
     }
-
     match_criterion {
       match_condition = "Contains"
       route_prefix    = ["10.0.0.0/8"]
@@ -207,7 +204,6 @@ resource "azurerm_route_map" "out" {
         community = ["22"]
       }
     }
-
     match_criterion {
       match_condition = "NotContains"
       route_prefix    = ["10.0.0.0/8"]

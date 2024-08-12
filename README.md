@@ -47,14 +47,16 @@ The following providers are used by this module:
 The following resources are used by this module:
 
 - [azurerm_express_route_circuit.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_circuit) (resource)
+- [azurerm_express_route_circuit_authorization.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_circuit_authorization) (resource)
 - [azurerm_express_route_circuit_peering.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_circuit_peering) (resource)
+- [azurerm_express_route_connection.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_connection) (resource)
 - [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
 - [azurerm_monitor_diagnostic_setting.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) (resource)
 - [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
+- [azurerm_virtual_network_gateway_connection.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network_gateway_connection) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/Azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [azurerm_client_config.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
-- [azurerm_resource_group.parent](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/Azure/modtm/latest/docs/data-sources/module_source) (data source)
 
 <!-- markdownlint-disable MD013 -->
@@ -209,6 +211,107 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_er_gw_connections"></a> [er\_gw\_connections](#input\_er\_gw\_connections)
+
+Description:     (Optional) A map of association objects to create connections between the created circuit and the designated gateways.
+
+    - `name` - (Required) The name of the connection.
+    - `express_route_circuit_peering_id` - (Optional) The id of the peering to associate to. Note: Either `express_route_circuit_peering_id` or `peering_map_key` must be set.
+    - `peering_map_key` - (Optional) The key of the peering variable to associate to. Note: Either `peering_map_key` or `express_route_circuit_peering_id` or must be set.
+    - `express_route_gateway_id` - (Required) Resource ID of the Express Route Gateway.
+    - `authorization_key` - (Optional) The authorization key to establish the Express Route Connection.
+    - `enable_internet_security` - (Optional) Set Internet security for this Express Route Connection.
+    - `express_route_gateway_bypass_enabled` - (Optional) Specified whether Fast Path is enabled for Virtual Wan Firewall Hub. Defaults to false.
+    - `private_link_fast_path_enabled` - (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express\_route\_gateway\_bypass\_enabled must be set to true. Defaults to false.
+    - `routing_weight` - (Optional) The routing weight associated to the Express Route Connection. Possible value is between 0 and 32000. Defaults to 0.
+    - `routing` - (Optional) A routing block.
+      - `associated_route_table_id` - (Optional) The ID of the Virtual Hub Route Table associated with this Express Route Connection.
+      - `inbound_route_map_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for inbound routes.
+      - `outbound_route_map_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for outbound routes.
+      - `propagated_route_table` - (Optional) A propagated\_route\_table block.
+        - `labels` - (Optional) The list of labels to logically group route tables.
+        - `route_table_ids` - (Optional) A list of IDs of the Virtual Hub Route Table to propagate routes from Express Route Connection to the route table.
+
+    Example Input:
+
+```terraform
+    er_gw_connections = {
+    connection1er = {
+      name                             = "ExRConnection-westus2-er"
+      express_route_gateway_id         = local.same_rg_er_gw_id
+      express_route_circuit_peering_id = local.same_rg_er_peering_id
+      peering_map_key = "firstPeeringConfig"
+      routeting_weight = 0
+      routing = {
+        inbound_route_map_id         = azurerm_route_map.in.id
+        outbound_route_map_id        = azurerm_route_map.out.id
+        propagated_route_table = {
+          route_table_ids = [
+            azurerm_virtual_hub_route_table.example.id,
+            azurerm_virtual_hub_route_table.additional.id
+          ]
+        }
+      }
+    }
+  }
+```
+
+Type:
+
+```hcl
+map(object({
+    name                                 = string
+    express_route_circuit_peering_id     = optional(string, null)
+    peering_map_key                      = optional(string, null)
+    express_route_gateway_id             = string
+    authorization_key                    = optional(string, null)
+    enable_internet_security             = optional(bool, false)
+    express_route_gateway_bypass_enabled = optional(bool, false)
+    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
+    routing_weight = optional(number, 0)
+    routing = optional(object({
+      associated_route_table_id = optional(string)
+      inbound_route_map_id      = optional(string)
+      outbound_route_map_id     = optional(string)
+      propagated_route_table = object({
+        labels          = optional(list(string), null)
+        route_table_ids = optional(list(string), null)
+      })
+    }), null)
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_express_route_circuit_authorizations"></a> [express\_route\_circuit\_authorizations](#input\_express\_route\_circuit\_authorizations)
+
+Description:     (Optional) A map of authorization objects to create authorizations for the ExpressRoute Circuits.
+
+    - `name` - (Required) The name of the authorization.
+
+    Example Input:
+
+```terraform
+    express_route_circuit_authorizations = {
+      authorization1 = {
+        name              = "authorization1"
+      },
+      authorization2 = {
+        name              = "azurerm_express_route_gateway.some_gateway.name-authorization"
+      }
+    }
+```
+
+Type:
+
+```hcl
+map(object({
+    name = string
+  }))
+```
+
+Default: `{}`
+
 ### <a name="input_express_route_port_id"></a> [express\_route\_port\_id](#input\_express\_route\_port\_id)
 
 Description:   (Optional) The ID of the ExpressRoute Port.
@@ -260,7 +363,7 @@ Description:     (Optional) A map of association objects to create peerings betw
 
     Example Input:
 
-    ```terraform
+```terraform
     peerings = {
       PrivatePeering = {
         peering_type                  = "AzurePrivatePeering"
@@ -305,9 +408,7 @@ Type:
 
 ```hcl
 map(object({
-    peering_type = string
-    # express_route_circuit_name  = string
-    # resource_group_name         = string
+    peering_type                  = string
     vlan_id                       = number
     primary_peer_address_prefix   = optional(string, null)
     secondary_peer_address_prefix = optional(string, null)
@@ -326,8 +427,8 @@ map(object({
       secondary_peer_address_prefix = string
       enabled                       = optional(bool, true)
       route_filter_id               = optional(string, null)
-      microsoft_peering_config = optional(object({
-        advertised_public_prefixes = list(string)
+      microsoft_peering = optional(object({
+        advertised_public_prefixes = optional(list(string))
         customer_asn               = optional(number, null)
         routing_registry_name      = optional(string, "NONE")
         advertised_communities     = optional(list(string), null)
@@ -375,6 +476,51 @@ Description: (Optional) Tags of the resource.
 Type: `map(string)`
 
 Default: `null`
+
+### <a name="input_vnet_gw_connections"></a> [vnet\_gw\_connections](#input\_vnet\_gw\_connections)
+
+Description:     (Optional) A map of association objects to create connections between the created circuit and the designated gateways.
+
+    - `name` - (Required) The name of the connection.
+    - `resource_group_name` - (Required) The name of the resource group in which to create the connection Changing this forces a new resource to be created.
+    - `location` - (Required) The location/region where the connection is located.
+    - `virtual_network_gateway_id` - (Required) The ID of the Virtual Network Gateway in which the connection will be created.
+    - `authorization_key` - (Optional) The authorization key associated with the Express Route Circuit.
+    - `routing_weight` - (Optional) The routing weight. Defaults to 0.
+    - `express_route_gateway_bypass` - (Optional) If true, data packets will bypass ExpressRoute Gateway for data forwarding.
+    - `private_link_fast_path_enabled` - (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express\_route\_gateway\_bypass must be set to true. Defaults to false.
+    - `tags` - (Optional) A mapping of tags to assign to the resource.
+
+    Example Input:
+
+```terraform
+  vnet_gw_connections = {
+    connection1gw = {
+      name                       = local.same_rg_conn_name
+      virtual_network_gateway_id = local.same_rg_gw_id
+      location                   = local.location
+      resource_group_name        = local.resource_group_name
+    }
+  }
+```
+
+Type:
+
+```hcl
+map(object({
+    name                         = string
+    resource_group_name          = string
+    location                     = string
+    virtual_network_gateway_id   = string
+    authorization_key            = optional(string, null)
+    routing_weight               = optional(number, 0)
+    express_route_gateway_bypass = optional(bool, false)
+    #private_link_fast_path_enabled = optional(bool, false) # Unable to test parameter due to bug #26746, parameter disabled until we solve the issue
+    tags = optional(map(string), null)
+  }))
+```
+
+Default: `{}`
 
 ## Outputs
 

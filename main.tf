@@ -1,10 +1,8 @@
-data "azurerm_resource_group" "parent" {
-  name = var.resource_group_name
-}
-
 resource "azurerm_express_route_circuit_authorization" "this" {
-  name                       = "exampleERCAuth"
+  for_each = var.express_route_circuit_authorizations
+
   express_route_circuit_name = azurerm_express_route_circuit.this.name
+  name                       = each.value.name
   resource_group_name        = azurerm_express_route_circuit.this.resource_group_name
 }
 
@@ -13,7 +11,7 @@ resource "azurerm_express_route_circuit_peering" "this" {
 
   express_route_circuit_name    = azurerm_express_route_circuit.this.name
   peering_type                  = each.value.peering_type
-  resource_group_name           = data.azurerm_resource_group.parent.name
+  resource_group_name           = var.resource_group_name
   vlan_id                       = each.value.vlan_id
   ipv4_enabled                  = each.value.ipv4_enabled
   peer_asn                      = each.value.peer_asn
@@ -26,59 +24,60 @@ resource "azurerm_express_route_circuit_peering" "this" {
     for_each = each.value.ipv6 != null ? [each.value.ipv6] : []
 
     content {
-      enabled                       = each.value.ipv6.enabled
       primary_peer_address_prefix   = each.value.ipv6.primary_peer_address_prefix
       secondary_peer_address_prefix = each.value.ipv6.secondary_peer_address_prefix
+      enabled                       = each.value.ipv6.enabled
       route_filter_id               = each.value.ipv6.route_filter_id
 
       dynamic "microsoft_peering" {
         for_each = each.value.ipv6.microsoft_peering != null ? [each.value.ipv6.microsoft_peering_config] : []
 
         content {
+          advertised_communities     = each.value.ipv6.microsoft_peering.advertised_communities
           advertised_public_prefixes = each.value.ipv6.microsoft_peering.advertised_public_prefixes
           customer_asn               = each.value.ipv6.microsoft_peering.customer_asn
           routing_registry_name      = each.value.ipv6.microsoft_peering.routing_registry_name
-          advertised_communities     = each.value.ipv6.microsoft_peering.advertised_communities
         }
       }
     }
   }
-
   dynamic "microsoft_peering_config" {
     for_each = each.value.microsoft_peering_config != null ? [each.value.microsoft_peering_config] : []
 
     content {
       advertised_public_prefixes = each.value.microsoft_peering_config.advertised_public_prefixes
+      advertised_communities     = each.value.microsoft_peering_config.advertised_communities
       customer_asn               = each.value.microsoft_peering_config.customer_asn
       routing_registry_name      = each.value.microsoft_peering_config.routing_registry_name
-      advertised_communities     = each.value.microsoft_peering_config.advertised_communities
     }
   }
 }
 
-# Create connection between the Express Route Circuit and the Express Route Gateways
+# Create connection between the Express Route Circuit and Virtual Network Gateways
 resource "azurerm_virtual_network_gateway_connection" "this" {
   for_each = var.vnet_gw_connections
 
-  name                       = each.value.name
-  resource_group_name        = each.value.resource_group_name
-  location                   = each.value.location
-  type                       = "ExpressRoute"
-  virtual_network_gateway_id = each.value.virtual_network_gateway_id
-  express_route_circuit_id   = azurerm_express_route_circuit.this.id
-  authorization_key = each.value.authorization_key
-  routing_weight    = each.value.routing_weight
+  location                     = each.value.location
+  name                         = each.value.name
+  resource_group_name          = each.value.resource_group_name
+  type                         = "ExpressRoute"
+  virtual_network_gateway_id   = each.value.virtual_network_gateway_id
+  authorization_key            = each.value.authorization_key
+  express_route_circuit_id     = azurerm_express_route_circuit.this.id
   express_route_gateway_bypass = each.value.express_route_gateway_bypass
-  #private_link_fast_path_enabled = each.value.private_link_fast_path_enabled # Unable to test parameter due to bug #26746, parameter disabled until we solve the issue
-  #TODO:  Add validation on parameters
+  routing_weight               = each.value.routing_weight
+  tags                         = each.value.tags
+
+  depends_on = [azurerm_express_route_circuit_peering.this]
 }
 
+# Create connection between the Express Route Circuit and Express Route Gateways (VWan)
 resource "azurerm_express_route_connection" "this" {
   for_each = var.er_gw_connections
 
-  name                                 = each.value.name
+  express_route_circuit_peering_id     = coalesce(each.value.express_route_circuit_peering_id, try(azurerm_express_route_circuit_peering.this[each.value.peering_map_key].id, ""))
   express_route_gateway_id             = each.value.express_route_gateway_id
-  express_route_circuit_peering_id     = coalesce(each.value.express_route_circuit_peering_id, try(azurerm_express_route_circuit_peering.this[each.value.peering_map_key].id,"")) 
+  name                                 = each.value.name
   express_route_gateway_bypass_enabled = false
   #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
   routing_weight = each.value.routing_weight
@@ -101,9 +100,7 @@ resource "azurerm_express_route_connection" "this" {
       }
     }
   }
-  #TODO: Add validation on parameters
-    # Validate that either express_route_circuit_peering_id or peering_map_key is set and
-} 
+}
 
 # required AVM resources interfaces
 resource "azurerm_management_lock" "this" {
@@ -123,7 +120,7 @@ resource "azurerm_role_assignment" "this" {
   for_each = var.role_assignments
 
   principal_id                           = each.value.principal_id
-  scope                                  = data.azurerm_resource_group.parent.id
+  scope                                  = azurerm_express_route_circuit.this.id
   condition                              = each.value.condition
   condition_version                      = each.value.condition_version
   delegated_managed_identity_resource_id = each.value.delegated_managed_identity_resource_id
