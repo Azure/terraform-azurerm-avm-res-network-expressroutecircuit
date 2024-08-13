@@ -24,13 +24,13 @@ locals {
   name                  = "SEA-Cust10-ER"
   peering_location      = "Seattle"
   resource_group_name   = "SEA-Cust10"
-  same_rg_conn_name     = "same_rg_connection"
-  same_rg_er_gw_id      = "/subscriptions/4bffbb15-d414-4874-a2e4-c548c6d45e2a/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/56baea672a39485b969fdd25f5832098-westus2-er-gw"
-  same_rg_er_peering_id = "/subscriptions/4bffbb15-d414-4874-a2e4-c548c6d45e2a/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
-  same_rg_gw_id         = "/subscriptions/4bffbb15-d414-4874-a2e4-c548c6d45e2a/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
+  vng-gw-conn_name     = "vng-gw-conn"
+  vwan-gw-id      = "/subscriptions/<subscription-id>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/56baea672a39485b969fdd25f5832098-westus2-er-gw"
+  vng-gw-peering-id = "/subscriptions/<subscription-id>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
+  vng-gw-id         = "/subscriptions/<subscription-id>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
   service_provider_name = "Equinix"
   tier                  = "Premium"
-  vwh_id                = "/subscriptions/4bffbb15-d414-4874-a2e4-c548c6d45e2a/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
+  vwan-hub-id                = "/subscriptions/<subscription-id>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
 }
 
 
@@ -81,6 +81,7 @@ module "exr_circuit_test" {
       secondary_peer_address_prefix = "10.0.0.4/30"
       ipv4_enabled                  = true
       vlan_id                       = 300
+      shared_key                    = "A1B2C3D4E5F6"
 
       ipv6 = {
         primary_peer_address_prefix   = "2002:db01::/126"
@@ -88,29 +89,28 @@ module "exr_circuit_test" {
         enabled                       = true
       }
     }
-    # ,
-    # secondPeeringConfig = {
-    #   peering_type                  = "MicrosoftPeering"
-    #   peer_asn                      = 200
-    #   primary_peer_address_prefix   = "123.0.0.0/30"
-    #   secondary_peer_address_prefix = "123.0.0.4/30"
-    #   ipv4_enabled                  = true
-    #   vlan_id                       = 400
+    secondPeeringConfig = {
+      peering_type                  = "MicrosoftPeering"
+      peer_asn                      = 200
+      primary_peer_address_prefix   = "123.0.0.0/30"
+      secondary_peer_address_prefix = "123.0.0.4/30"
+      ipv4_enabled                  = true
+      vlan_id                       = 400
 
-    #   microsoft_peering_config = {
-    #     advertised_public_prefixes = ["123.1.0.0/24"]
-    #   }
+      microsoft_peering_config = {
+        advertised_public_prefixes = ["123.1.0.0/24"]
+      }
 
-    #   ipv6 = {
-    #     primary_peer_address_prefix   = "2002:db01::/126"
-    #     secondary_peer_address_prefix = "2003:db01::/126"
-    #     enabled                       = true
+      ipv6 = {
+        primary_peer_address_prefix   = "2002:db01::/126"
+        secondary_peer_address_prefix = "2003:db01::/126"
+        enabled                       = true
 
-    #     microsoft_peering = {
-    #       advertised_public_prefixes = ["2002:db01::/126"]
-    #     }
-    #   }
-    # }
+        microsoft_peering = {
+          advertised_public_prefixes = ["2002:db01::/126"]
+        }
+      }
+    }
   }
 
   express_route_circuit_authorizations = {
@@ -123,19 +123,19 @@ module "exr_circuit_test" {
   }
 
   vnet_gw_connections = {
-    connection1gw = {
-      name                       = local.same_rg_conn_name
-      virtual_network_gateway_id = local.same_rg_gw_id
+    connection-gw = {
+      name                       = local.vng-gw-conn_name
+      virtual_network_gateway_id = local.vng-gw-id
       location                   = local.location
       resource_group_name        = local.resource_group_name
     }
   }
 
   er_gw_connections = {
-    connection1er = {
+    connection-er = {
       name                             = "ExRConnection-westus2-er"
-      express_route_gateway_id         = local.same_rg_er_gw_id
-      express_route_circuit_peering_id = local.same_rg_er_peering_id
+      express_route_gateway_id         = local.vwan-gw-id
+      express_route_circuit_peering_id = local.vng-gw-peering-id
       peering_map_key                  = "firstPeeringConfig"
       routeting_weight                 = 0
       routing = {
@@ -156,19 +156,19 @@ module "exr_circuit_test" {
 # Create a Route Table (Primary)
 resource "azurerm_virtual_hub_route_table" "example" {
   name           = "example-route-table"
-  virtual_hub_id = local.vwh_id
+  virtual_hub_id = local.vwan-hub-id
 }
 
 # Create an additional Route Table (Propagated)
 resource "azurerm_virtual_hub_route_table" "additional" {
   name           = "additional-route-table"
-  virtual_hub_id = local.vwh_id
+  virtual_hub_id = local.vwan-hub-id
 }
 
 # Test rout map for association to connection
 resource "azurerm_route_map" "in" {
   name           = "example-rm-in"
-  virtual_hub_id = local.vwh_id
+  virtual_hub_id = local.vwan-hub-id
 
   rule {
     name                 = "rule1"
@@ -191,7 +191,7 @@ resource "azurerm_route_map" "in" {
 # Test rout map for association to connection
 resource "azurerm_route_map" "out" {
   name           = "example-rm-out"
-  virtual_hub_id = local.vwh_id
+  virtual_hub_id = local.vwan-hub-id
 
   rule {
     name                 = "rule1"
