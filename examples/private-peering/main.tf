@@ -24,13 +24,13 @@ locals {
   name                  = "SEA-Cust10-ER"
   peering_location      = "Seattle"
   resource_group_name   = "SEA-Cust10"
-  vng-gw-conn_name     = "vng-gw-conn"
-  vwan-gw-id      = "/subscriptions/<subscription>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/56baea672a39485b969fdd25f5832098-westus2-er-gw"
-  vng-gw-peering-id = "/subscriptions/<subscription>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
-  vng-gw-id         = "/subscriptions/<subscription>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
   service_provider_name = "Equinix"
   tier                  = "Premium"
-  vwan-hub-id                = "/subscriptions/<subscription>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
+  vng_gw_conn_name      = "vng-gw-conn"
+  vng_gw_id             = "/subscriptions/<subscription>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
+  vng_gw_peering_id     = "/subscriptions/<subscription>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
+  vwan_gw_id            = "/subscriptions/<subscription>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/56baea672a39485b969fdd25f5832098-westus2-er-gw"
+  vwan_hub_id           = "/subscriptions/<subscription>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
 }
 
 
@@ -124,8 +124,8 @@ module "exr_circuit_test" {
 
   vnet_gw_connections = {
     connection-gw = {
-      name                       = local.vng-gw-conn_name
-      virtual_network_gateway_id = local.vng-gw-id
+      name                       = local.vng_gw_conn_name
+      virtual_network_gateway_id = local.vng_gw_id
       location                   = local.location
       resource_group_name        = local.resource_group_name
     }
@@ -134,8 +134,8 @@ module "exr_circuit_test" {
   er_gw_connections = {
     connection-er = {
       name                             = "ExRConnection-westus2-er"
-      express_route_gateway_id         = local.vwan-gw-id
-      express_route_circuit_peering_id = local.vng-gw-peering-id
+      express_route_gateway_id         = local.vwan_gw_id
+      express_route_circuit_peering_id = local.vng_gw_peering_id
       peering_map_key                  = "firstPeeringConfig"
       routeting_weight                 = 0
       routing = {
@@ -156,19 +156,19 @@ module "exr_circuit_test" {
 # Create a Route Table (Primary)
 resource "azurerm_virtual_hub_route_table" "example" {
   name           = "example-route-table"
-  virtual_hub_id = local.vwan-hub-id
+  virtual_hub_id = local.vwan_hub_id
 }
 
 # Create an additional Route Table (Propagated)
 resource "azurerm_virtual_hub_route_table" "additional" {
   name           = "additional-route-table"
-  virtual_hub_id = local.vwan-hub-id
+  virtual_hub_id = local.vwan_hub_id
 }
 
 # Test rout map for association to connection
 resource "azurerm_route_map" "in" {
   name           = "example-rm-in"
-  virtual_hub_id = local.vwan-hub-id
+  virtual_hub_id = local.vwan_hub_id
 
   rule {
     name                 = "rule1"
@@ -191,7 +191,7 @@ resource "azurerm_route_map" "in" {
 # Test rout map for association to connection
 resource "azurerm_route_map" "out" {
   name           = "example-rm-out"
-  virtual_hub_id = local.vwan-hub-id
+  virtual_hub_id = local.vwan_hub_id
 
   rule {
     name                 = "rule1"

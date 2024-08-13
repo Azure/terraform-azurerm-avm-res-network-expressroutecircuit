@@ -540,9 +540,25 @@ Default: `{}`
 
 The following outputs are exported:
 
+### <a name="output_authorisation_keys"></a> [authorisation\_keys](#output\_authorisation\_keys)
+
+Description: Authorisation keys for the ExpressRoute circuit.
+
+### <a name="output_authorisation_used_status"></a> [authorisation\_used\_status](#output\_authorisation\_used\_status)
+
+Description: Authorisation used status.
+
+### <a name="output_express_route_gateway_connections"></a> [express\_route\_gateway\_connections](#output\_express\_route\_gateway\_connections)
+
+Description: ExpressRoute gateway connections.
+
 ### <a name="output_name"></a> [name](#output\_name)
 
 Description: The resource name of the ExpressRoute circuit.
+
+### <a name="output_peerings"></a> [peerings](#output\_peerings)
+
+Description: ExpressRoute Circuit peering configurations.
 
 ### <a name="output_resource"></a> [resource](#output\_resource)
 
@@ -551,6 +567,10 @@ Description: The Azure ExpressRoute circuit resource.
 ### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
 
 Description: The resource ID of the ExpressRoute circuit.
+
+### <a name="output_virtual_network_gateway_connections"></a> [virtual\_network\_gateway\_connections](#output\_virtual\_network\_gateway\_connections)
+
+Description: Virtual network gateway connections.
 
 ## Modules
 

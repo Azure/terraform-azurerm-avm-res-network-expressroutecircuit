@@ -68,6 +68,7 @@ resource "azurerm_virtual_network_gateway_connection" "this" {
   routing_weight               = each.value.routing_weight
   tags                         = each.value.tags
 
+  # Depends on is necessary here because deployment of a connection before the peering has complere will cause the connection to be created in a failed state
   depends_on = [azurerm_express_route_circuit_peering.this]
 }
 
@@ -101,7 +102,8 @@ resource "azurerm_express_route_connection" "this" {
     }
   }
 
-  depends_on = [ azurerm_virtual_network_gateway_connection.this ]
+  # Adding the depends because creeating multiple connections (vnet gateway and ER) at the same time causese deployment failure.
+  depends_on = [azurerm_virtual_network_gateway_connection.this]
 }
 
 # required AVM resources interfaces
