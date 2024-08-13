@@ -25,12 +25,12 @@ locals {
   peering_location      = "Seattle"
   resource_group_name   = "SEA-Cust10"
   vng-gw-conn_name     = "vng-gw-conn"
-  vwan-gw-id      = "/subscriptions/<subscription-id>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/56baea672a39485b969fdd25f5832098-westus2-er-gw"
-  vng-gw-peering-id = "/subscriptions/<subscription-id>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
-  vng-gw-id         = "/subscriptions/<subscription-id>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
+  vwan-gw-id      = "/subscriptions/<subscription>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/56baea672a39485b969fdd25f5832098-westus2-er-gw"
+  vng-gw-peering-id = "/subscriptions/<subscription>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
+  vng-gw-id         = "/subscriptions/<subscription>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
   service_provider_name = "Equinix"
   tier                  = "Premium"
-  vwan-hub-id                = "/subscriptions/<subscription-id>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
+  vwan-hub-id                = "/subscriptions/<subscription>/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
 }
 
 

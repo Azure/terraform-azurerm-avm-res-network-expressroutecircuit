@@ -30,7 +30,7 @@ resource "azurerm_express_route_circuit_peering" "this" {
       route_filter_id               = each.value.ipv6.route_filter_id
 
       dynamic "microsoft_peering" {
-        for_each = each.value.ipv6.microsoft_peering != null ? [each.value.ipv6.microsoft_peering_config] : []
+        for_each = each.value.ipv6.microsoft_peering != null ? [each.value.ipv6.microsoft_peering] : []
 
         content {
           advertised_communities     = each.value.ipv6.microsoft_peering.advertised_communities
@@ -100,6 +100,8 @@ resource "azurerm_express_route_connection" "this" {
       }
     }
   }
+
+  depends_on = [ azurerm_virtual_network_gateway_connection.this ]
 }
 
 # required AVM resources interfaces
