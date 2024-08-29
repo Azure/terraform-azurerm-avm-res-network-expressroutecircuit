@@ -23,11 +23,28 @@ provider "azurerm" {
 }
 
 locals {
-  bandwidth_in_mbps     = 50
-  family                = "UnlimitedData"
-  location              = "East US"
-  peering_location      = "Silicon Valley"
-  resource_group_name   = "test-erc"
+  bandwidth_in_mbps = 50
+  diagnostic_settings = {
+    sendToLogAnalytics = {
+      name                           = "sendToLogAnalytics"
+      workspace_resource_id          = azurerm_log_analytics_workspace.this.id
+      log_analytics_destination_type = "Dedicated"
+    }
+  }
+  family   = "UnlimitedData"
+  location = "East US"
+  lock = {
+    kind = "ReadOnly"
+    name = "exr-lock"
+  }
+  peering_location    = "Silicon Valley"
+  resource_group_name = "test-erc"
+  role_assignments = {
+    role1 = {
+      principal_id               = azurerm_user_assigned_identity.this.principal_id
+      role_definition_id_or_name = "Contributor"
+    }
+  }
   service_provider_name = "Equinix"
   tier                  = "Standard"
 }
@@ -59,6 +76,19 @@ resource "azurerm_resource_group" "this" {
   name     = local.resource_group_name
 }
 
+# This is required for the user assigned identity
+resource "azurerm_user_assigned_identity" "this" {
+  location            = azurerm_resource_group.this.location
+  name                = module.naming.user_assigned_identity.name_unique
+  resource_group_name = azurerm_resource_group.this.name
+}
+
+resource "azurerm_log_analytics_workspace" "this" {
+  location            = azurerm_resource_group.this.location
+  name                = module.naming.log_analytics_workspace.name_unique
+  resource_group_name = azurerm_resource_group.this.name
+}
+
 # This is the module call
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
@@ -71,6 +101,10 @@ module "exr_circuit_test" {
   peering_location      = local.peering_location
   bandwidth_in_mbps     = local.bandwidth_in_mbps
   location              = local.location
+  lock                  = local.lock
+  role_assignments      = local.role_assignments
+  diagnostic_settings   = local.diagnostic_settings
+
 
   sku = {
     tier   = local.tier
@@ -105,7 +139,9 @@ The following providers are used by this module:
 
 The following resources are used by this module:
 
+- [azurerm_log_analytics_workspace.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace) (resource)
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [azurerm_user_assigned_identity.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/user_assigned_identity) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 
 <!-- markdownlint-disable MD013 -->

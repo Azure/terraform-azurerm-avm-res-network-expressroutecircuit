@@ -17,23 +17,7 @@ provider "azurerm" {
 }
 
 locals {
-  bandwidth_in_mbps     = 50
-  family                = "UnlimitedData"
-  location              = "East US"
-  peering_location      = "Silicon Valley"
-  resource_group_name   = "test-erc"
-  service_provider_name = "Equinix"
-  tier                  = "Standard"
-  lock = {
-    kind = "ReadOnly"
-    name = "exr-lock"
-  }
-  role_assignments = {
-    role1 = {
-      principal_id               = azurerm_user_assigned_identity.this.principal_id
-      role_definition_id_or_name = "Contributor"
-    }
-  }
+  bandwidth_in_mbps = 50
   diagnostic_settings = {
     sendToLogAnalytics = {
       name                           = "sendToLogAnalytics"
@@ -41,6 +25,22 @@ locals {
       log_analytics_destination_type = "Dedicated"
     }
   }
+  family   = "UnlimitedData"
+  location = "East US"
+  lock = {
+    kind = "ReadOnly"
+    name = "exr-lock"
+  }
+  peering_location    = "Silicon Valley"
+  resource_group_name = "test-erc"
+  role_assignments = {
+    role1 = {
+      principal_id               = azurerm_user_assigned_identity.this.principal_id
+      role_definition_id_or_name = "Contributor"
+    }
+  }
+  service_provider_name = "Equinix"
+  tier                  = "Standard"
 }
 
 

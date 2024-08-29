@@ -2,7 +2,7 @@
 # terraform-azurerm-avm-res-network-expressroutecircuit
 
 This is a module for deploying an Azure Express Route Circuit with it's dependencies.
-Make sure you check out the Azure [ExpressRoute Documentation](https://learn.microsoft.com/en-us/azure/expressroute/expressroute-introduction)!
+Make sure yopu check out the Azure [ExpressRoute Documentation](https://learn.microsoft.com/en-us/azure/expressroute/expressroute-introduction)!
 
 > [!IMPORTANT]
 > As the overall AVM framework is not GA (generally available) yet - the CI framework and test automation is not fully functional and implemented across all supported languages yet - breaking changes are to be expected.
@@ -11,18 +11,16 @@ Make sure you check out the Azure [ExpressRoute Documentation](https://learn.mic
 
 ## Resources deployed by this module
 - ExpressRoute Circuit
-- ExpressRoute Circuit Private Peering
-- ExpressRoute Circuit Microsoft Peering
+- ExpressRoute Circuit Peering
 - ExpressRoute Circuit Connection
 - Resource lock
 - IaM
 - Diagnostic settings
 
 ## Deployment order
-1. Deploy ExpressRoute Circuit 
-1. Extract Service Key from the module output
-1. [Work with your service provider to enable the circuit](https://learn.microsoft.com/en-us/azure/expressroute/expressroute-howto-circuit-portal-resource-manager#send-the-service-key-to-your-connectivity-provider-for-provisioning)
-1. Once Circuit is in "Provisioned" state, you can deploy the peering (private and Microsoft) and all dependency services.
+1. Deploy the circuit and extract the Service Key from the module output
+2. Work with your service provider to enable the circuit
+3. Once Circuit is in Provision State "Provisioned" yo can deploy the peering and all dependency services.
 
 Note: If you try to deploy a peering before the circuit is in Provisioned state, the module will fail. From a Terraform perspective, we recommend to not provide any parameters for dependant resources (Peerings, Connections etc...) until after the circuit is provisioned, that way your terraform deployment will succeed and your state file will happy.
 
