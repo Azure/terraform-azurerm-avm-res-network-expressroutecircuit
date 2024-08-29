@@ -8,6 +8,9 @@
 # terraform plan file
 plan
 
+# debug output file
+output.txt
+
 # Crash log files
 crash.log
 crash.*.log
