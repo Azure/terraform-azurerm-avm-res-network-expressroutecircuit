@@ -6,7 +6,6 @@ DESCRIPTION
   nullable    = false
 }
 
-# variable "name" { - TODO - add name variable, might already be in here
 variable "name" {
   type        = string
   description = <<DESCRIPTION
@@ -200,7 +199,7 @@ variable "er_gw_connections" {
     - `authorization_key` - (Optional) The authorization key to establish the Express Route Connection.
     - `enable_internet_security` - (Optional) Set Internet security for this Express Route Connection.
     - `express_route_gateway_bypass_enabled` - (Optional) Specified whether Fast Path is enabled for Virtual Wan Firewall Hub. Defaults to false.
-    - `private_link_fast_path_enabled` - (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass_enabled must be set to true. Defaults to false.
+    - `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass_enabled must be set to true. Defaults to false.
     - `routing_weight` - (Optional) The routing weight associated to the Express Route Connection. Possible value is between 0 and 32000. Defaults to 0.
     - `routing` - (Optional) A routing block.
       - `associated_route_table_id` - (Optional) The ID of the Virtual Hub Route Table associated with this Express Route Connection.
@@ -461,8 +460,9 @@ variable "vnet_gw_connections" {
     authorization_key            = optional(string, null)
     routing_weight               = optional(number, 0)
     express_route_gateway_bypass = optional(bool, false)
-    #private_link_fast_path_enabled = optional(bool, false) # Unable to test parameter due to bug #26746, parameter disabled until we solve the issue
-    tags = optional(map(string), null)
+    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746 
+    shared_key = optional(string, null)
+    tags       = optional(map(string), null)
   }))
   default     = {}
   description = <<DESCRIPTION
@@ -475,7 +475,7 @@ variable "vnet_gw_connections" {
     - `authorization_key` - (Optional) The authorization key associated with the Express Route Circuit.
     - `routing_weight` - (Optional) The routing weight. Defaults to 0.
     - `express_route_gateway_bypass` - (Optional) If true, data packets will bypass ExpressRoute Gateway for data forwarding.
-    - `private_link_fast_path_enabled` - (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass must be set to true. Defaults to false.
+    - `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass must be set to true. Defaults to false.
     - `tags` - (Optional) A mapping of tags to assign to the resource.
 
     Example Input:
@@ -494,7 +494,7 @@ variable "vnet_gw_connections" {
 
   validation {
     condition     = alltrue([for connection in var.vnet_gw_connections : can(regex("^/subscriptions/[0-9a-fA-F-]+/resourceGroups/[a-zA-Z0-9._-]+/providers/Microsoft.Network/virtualNetworkGateways/[a-zA-Z0-9._-]+$", connection.virtual_network_gateway_id))])
-    error_message = "gateway_resource_id must be in the form of an Azure resource ID."
+    error_message = "virtual_network_gateway_id must be in the form of an Azure resource ID."
   }
   validation {
     condition     = alltrue([for connection in var.vnet_gw_connections : connection.routing_weight >= 0 && connection.routing_weight <= 32000])

@@ -66,7 +66,9 @@ resource "azurerm_virtual_network_gateway_connection" "this" {
   express_route_circuit_id     = azurerm_express_route_circuit.this.id
   express_route_gateway_bypass = each.value.express_route_gateway_bypass
   routing_weight               = each.value.routing_weight
-  tags                         = each.value.tags
+  #private_link_fast_path_enabled = each.value.private_link_fast_path_enabled # disabled due to bug #26746
+  shared_key = each.value.shared_key
+  tags       = each.value.tags
 
   # Depends on is necessary here because deployment of a connection before the peering has complere will cause the connection to be created in a failed state
   depends_on = [azurerm_express_route_circuit_peering.this]
@@ -79,8 +81,8 @@ resource "azurerm_express_route_connection" "this" {
   express_route_circuit_peering_id     = coalesce(each.value.express_route_circuit_peering_id, try(azurerm_express_route_circuit_peering.this[each.value.peering_map_key].id, ""))
   express_route_gateway_id             = each.value.express_route_gateway_id
   name                                 = each.value.name
-  express_route_gateway_bypass_enabled = false
-  #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
+  express_route_gateway_bypass_enabled = each.value.express_route_gateway_bypass_enabled
+  #private_link_fast_path_enabled       = each.value.private_link_fast_path_enabled # disabled due to bug #26746
   routing_weight = each.value.routing_weight
 
   dynamic "routing" {

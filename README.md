@@ -40,7 +40,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.5)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.71)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (> 3.71, <= 3.99.0)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
@@ -50,7 +50,7 @@ The following requirements are needed by this module:
 
 The following providers are used by this module:
 
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (~> 3.71)
+- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (> 3.71, <= 3.99.0)
 
 - <a name="provider_modtm"></a> [modtm](#provider\_modtm) (~> 0.3)
 
@@ -236,7 +236,7 @@ Description:     (Optional) A map of association objects to create connections b
     - `authorization_key` - (Optional) The authorization key to establish the Express Route Connection.
     - `enable_internet_security` - (Optional) Set Internet security for this Express Route Connection.
     - `express_route_gateway_bypass_enabled` - (Optional) Specified whether Fast Path is enabled for Virtual Wan Firewall Hub. Defaults to false.
-    - `private_link_fast_path_enabled` - (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express\_route\_gateway\_bypass\_enabled must be set to true. Defaults to false.
+    - `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express\_route\_gateway\_bypass\_enabled must be set to true. Defaults to false.
     - `routing_weight` - (Optional) The routing weight associated to the Express Route Connection. Possible value is between 0 and 32000. Defaults to 0.
     - `routing` - (Optional) A routing block.
       - `associated_route_table_id` - (Optional) The ID of the Virtual Hub Route Table associated with this Express Route Connection.
@@ -502,7 +502,7 @@ Description:     (Optional) A map of association objects to create connections b
     - `authorization_key` - (Optional) The authorization key associated with the Express Route Circuit.
     - `routing_weight` - (Optional) The routing weight. Defaults to 0.
     - `express_route_gateway_bypass` - (Optional) If true, data packets will bypass ExpressRoute Gateway for data forwarding.
-    - `private_link_fast_path_enabled` - (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express\_route\_gateway\_bypass must be set to true. Defaults to false.
+    - `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express\_route\_gateway\_bypass must be set to true. Defaults to false.
     - `tags` - (Optional) A mapping of tags to assign to the resource.
 
     Example Input:
@@ -529,8 +529,9 @@ map(object({
     authorization_key            = optional(string, null)
     routing_weight               = optional(number, 0)
     express_route_gateway_bypass = optional(bool, false)
-    #private_link_fast_path_enabled = optional(bool, false) # Unable to test parameter due to bug #26746, parameter disabled until we solve the issue
-    tags = optional(map(string), null)
+    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
+    shared_key = optional(string, null)
+    tags       = optional(map(string), null)
   }))
 ```
 
