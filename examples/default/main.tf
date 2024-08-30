@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.74"
+      version = "3.99.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -14,8 +14,16 @@ terraform {
 
 provider "azurerm" {
   features {}
+  skip_provider_registration = true
 }
 
+locals {
+  bandwidth_in_mbps     = 50
+  family                = "MeteredData"
+  peering_location      = "Seattle"
+  service_provider_name = "Equinix"
+  tier                  = "Premium"
+}
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
@@ -44,7 +52,19 @@ resource "azurerm_resource_group" "this" {
 }
 
 # This is the module call
-# Do not specify location here due to the randomization above.
-# Leaving location as `null` will cause the module to use the resource group location
-# with a data source.
+module "exr_circuit_test" {
+  source                = "../../"
+  resource_group_name   = azurerm_resource_group.this.name
+  name                  = module.naming.express_route_circuit.name_unique
+  service_provider_name = local.service_provider_name
+  peering_location      = local.peering_location
+  bandwidth_in_mbps     = local.bandwidth_in_mbps
+  location              = azurerm_resource_group.this.location
 
+  sku = {
+    tier   = local.tier
+    family = local.family
+  }
+
+  enable_telemetry = var.enable_telemetry # see variables.tf
+}

@@ -66,11 +66,11 @@ resource "azurerm_virtual_network_gateway_connection" "this" {
   express_route_circuit_id     = azurerm_express_route_circuit.this.id
   express_route_gateway_bypass = each.value.express_route_gateway_bypass
   routing_weight               = each.value.routing_weight
-  #private_link_fast_path_enabled = each.value.private_link_fast_path_enabled # disabled due to bug #26746
+  # private_link_fast_path_enabled = each.value.private_link_fast_path_enabled # disabled due to bug #26746
   shared_key = each.value.shared_key
   tags       = each.value.tags
 
-  # Depends on is necessary here because deployment of a connection before the peering has complere will cause the connection to be created in a failed state
+  # Depends on is necessary here because deployment of a connection before the peering has complete will cause the connection to be created in a failed state.
   depends_on = [azurerm_express_route_circuit_peering.this]
 }
 
@@ -82,7 +82,7 @@ resource "azurerm_express_route_connection" "this" {
   express_route_gateway_id             = each.value.express_route_gateway_id
   name                                 = each.value.name
   express_route_gateway_bypass_enabled = each.value.express_route_gateway_bypass_enabled
-  #private_link_fast_path_enabled       = each.value.private_link_fast_path_enabled # disabled due to bug #26746
+  # private_link_fast_path_enabled       = each.value.private_link_fast_path_enabled # disabled due to bug #26746
   routing_weight = each.value.routing_weight
 
   dynamic "routing" {
@@ -104,7 +104,7 @@ resource "azurerm_express_route_connection" "this" {
     }
   }
 
-  # Adding the depends because creeating multiple connections (vnet gateway and ER) at the same time causese deployment failure.
+  # Aepends on is necessary here because creating multiple connections (vnet gateway and ER gateway) at the same time causese deployment failure.
   depends_on = [azurerm_virtual_network_gateway_connection.this]
 }
 
