@@ -169,22 +169,22 @@ DESCRIPTION
 
 variable "er_gw_connections" {
   type = map(object({
-    name                                 = string
-    express_route_circuit_peering_id     = optional(string, null)
-    peering_map_key                      = optional(string, null)
-    express_route_gateway_id             = string
-    authorization_key                    = optional(string, null)
-    enable_internet_security             = optional(bool, false)
-    express_route_gateway_bypass_enabled = optional(bool, false)
+    name                                      = optional(string, "")
+    express_route_circuit_peering_resource_id = optional(string, null)
+    peering_map_key                           = optional(string, null)
+    express_route_gateway_resource_id         = string
+    authorization_key                         = optional(string, null)
+    enable_internet_security                  = optional(bool, false)
+    express_route_gateway_bypass_enabled      = optional(bool, false)
     #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
     routing_weight = optional(number, 0)
     routing = optional(object({
-      associated_route_table_id = optional(string)
-      inbound_route_map_id      = optional(string)
-      outbound_route_map_id     = optional(string)
+      associated_route_table_resource_id = optional(string)
+      inbound_route_map_resource_id      = optional(string)
+      outbound_route_map_resource_id     = optional(string)
       propagated_route_table = object({
-        labels          = optional(list(string), null)
-        route_table_ids = optional(list(string), null)
+        labels                   = optional(list(string), null)
+        route_table_resource_ids = optional(list(string), null)
       })
     }), null)
   }))
@@ -193,21 +193,21 @@ variable "er_gw_connections" {
     (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
 
     - `name` - (Required) The name of the connection.
-    - `express_route_circuit_peering_id` - (Optional) The id of the peering to associate to. Note: Either `express_route_circuit_peering_id` or `peering_map_key` must be set.
-    - `peering_map_key` - (Optional) The key of the peering variable to associate to. Note: Either `peering_map_key` or `express_route_circuit_peering_id` or must be set.
-    - `express_route_gateway_id` - (Required) Resource ID of the Express Route Gateway.
+    - `express_route_circuit_peering_resource_id` - (Optional) The id of the peering to associate to. Note: Either `express_route_circuit_peering_resource_id` or `peering_map_key` must be set.
+    - `peering_map_key` - (Optional) The key of the peering variable to associate to. Note: Either `peering_map_key` or `express_route_circuit_peering_resource_id` or must be set.
+    - `express_route_gateway_resource_id` - (Required) Resource ID of the Express Route Gateway.
     - `authorization_key` - (Optional) The authorization key to establish the Express Route Connection.
     - `enable_internet_security` - (Optional) Set Internet security for this Express Route Connection.
     - `express_route_gateway_bypass_enabled` - (Optional) Specified whether Fast Path is enabled for Virtual Wan Firewall Hub. Defaults to false.
     - `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass_enabled must be set to true. Defaults to false.
     - `routing_weight` - (Optional) The routing weight associated to the Express Route Connection. Possible value is between 0 and 32000. Defaults to 0.
     - `routing` - (Optional) A routing block.
-      - `associated_route_table_id` - (Optional) The ID of the Virtual Hub Route Table associated with this Express Route Connection.
-      - `inbound_route_map_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for inbound routes.
-      - `outbound_route_map_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for outbound routes.
+      - `associated_route_table_resource_id` - (Optional) The ID of the Virtual Hub Route Table associated with this Express Route Connection.
+      - `inbound_route_map_resource_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for inbound routes.
+      - `outbound_route_map_resource_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for outbound routes.
       - `propagated_route_table` - (Optional) A propagated_route_table block.
         - `labels` - (Optional) The list of labels to logically group route tables.
-        - `route_table_ids` - (Optional) A list of IDs of the Virtual Hub Route Table to propagate routes from Express Route Connection to the route table.
+        - `route_table_resource_ids` - (Optional) A list of IDs of the Virtual Hub Route Table to propagate routes from Express Route Connection to the route table.
 
     Example Input:
 
@@ -215,15 +215,15 @@ variable "er_gw_connections" {
     er_gw_connections = {
     connection1er = {
       name                             = "ExRConnection-westus2-er"
-      express_route_gateway_id         = local.same_rg_er_gw_id
-      express_route_circuit_peering_id = local.same_rg_er_peering_id
+      express_route_gateway_resource_id         = local.same_rg_er_gw_resource_id
+      express_route_circuit_peering_resource_id = local.same_rg_er_peering_resource_id
       peering_map_key = "firstPeeringConfig"
       routeting_weight = 0
       routing = {
-        inbound_route_map_id         = azurerm_route_map.in.id
-        outbound_route_map_id        = azurerm_route_map.out.id
+        inbound_route_map_resource_id         = azurerm_route_map.in.id
+        outbound_route_map_resource_id        = azurerm_route_map.out.id
         propagated_route_table = {
-          route_table_ids = [
+          route_table_resource_ids = [
             azurerm_virtual_hub_route_table.example.id,
             azurerm_virtual_hub_route_table.additional.id
           ]
@@ -235,8 +235,8 @@ variable "er_gw_connections" {
   DESCRIPTION
 
   validation {
-    condition     = alltrue([for connection in var.er_gw_connections : connection.express_route_circuit_peering_id != null || connection.peering_map_key != null])
-    error_message = "Either 'express_route_circuit_peering_id' or 'peering_map_key' must be set for each entry in 'er_gw_connections'."
+    condition     = alltrue([for connection in var.er_gw_connections : connection.express_route_circuit_peering_resource_id != null || connection.peering_map_key != null])
+    error_message = "Either 'express_route_circuit_peering_resource_id' or 'peering_map_key' must be set for each entry in 'er_gw_connections'."
   }
   validation {
     condition     = alltrue([for connection in var.er_gw_connections : connection.routing_weight >= 0 && connection.routing_weight <= 32000])
@@ -269,7 +269,7 @@ variable "express_route_circuit_authorizations" {
   DESCRIPTION
 }
 
-variable "express_route_port_id" {
+variable "express_route_port_resource_id" {
   type        = string
   default     = null
   description = <<DESCRIPTION
@@ -453,13 +453,13 @@ variable "tags" {
 
 variable "vnet_gw_connections" {
   type = map(object({
-    name                         = string
-    resource_group_name          = string
-    location                     = string
-    virtual_network_gateway_id   = string
-    authorization_key            = optional(string, null)
-    routing_weight               = optional(number, 0)
-    express_route_gateway_bypass = optional(bool, false)
+    name                                = optional(string, "")
+    resource_group_name                 = string
+    location                            = string
+    virtual_network_gateway_resource_id = string
+    authorization_key                   = optional(string, null)
+    routing_weight                      = optional(number, 0)
+    express_route_gateway_bypass        = optional(bool, false)
     #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746 
     shared_key = optional(string, null)
     tags       = optional(map(string), null)
@@ -471,7 +471,7 @@ variable "vnet_gw_connections" {
     - `name` - (Required) The name of the connection.
     - `resource_group_name` - (Required) The name of the resource group in which to create the connection Changing this forces a new resource to be created.
     - `location` - (Required) The location/region where the connection is located. 
-    - `virtual_network_gateway_id` - (Required) The ID of the Virtual Network Gateway in which the connection will be created.
+    - `virtual_network_gateway_resource_id` - (Required) The ID of the Virtual Network Gateway in which the connection will be created.
     - `authorization_key` - (Optional) The authorization key associated with the Express Route Circuit.
     - `routing_weight` - (Optional) The routing weight. Defaults to 0.
     - `express_route_gateway_bypass` - (Optional) If true, data packets will bypass ExpressRoute Gateway for data forwarding.
@@ -484,7 +484,7 @@ variable "vnet_gw_connections" {
   vnet_gw_connections = {
     connection1gw = {
       name                       = local.same_rg_conn_name
-      virtual_network_gateway_id = local.same_rg_gw_id
+      virtual_network_gateway_resource_id = local.same_rg_gw_resource_id
       location                   = local.location
       resource_group_name        = local.resource_group_name
     }
@@ -493,8 +493,8 @@ variable "vnet_gw_connections" {
   DESCRIPTION
 
   validation {
-    condition     = alltrue([for connection in var.vnet_gw_connections : can(regex("^/subscriptions/[0-9a-fA-F-]+/resourceGroups/[a-zA-Z0-9._-]+/providers/Microsoft.Network/virtualNetworkGateways/[a-zA-Z0-9._-]+$", connection.virtual_network_gateway_id))])
-    error_message = "virtual_network_gateway_id must be in the form of an Azure resource ID."
+    condition     = alltrue([for connection in var.vnet_gw_connections : can(regex("^/subscriptions/[0-9a-fA-F-]+/resourceGroups/[a-zA-Z0-9._-]+/providers/Microsoft.Network/virtualNetworkGateways/[a-zA-Z0-9._-]+$", connection.virtual_network_gateway_resource_id))])
+    error_message = "virtual_network_gateway_resource_id must be in the form of an Azure resource ID."
   }
   validation {
     condition     = alltrue([for connection in var.vnet_gw_connections : connection.routing_weight >= 0 && connection.routing_weight <= 32000])

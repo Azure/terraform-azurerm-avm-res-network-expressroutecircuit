@@ -123,27 +123,27 @@ module "exr_circuit_test" {
 
   vnet_gw_connections = {
     connection-gw = {
-      name                         = local.vng_gw_conn_name
-      virtual_network_gateway_id   = local.vng_gw_id
-      location                     = local.location
-      resource_group_name          = local.resource_group_name
-      express_route_gateway_bypass = true
+      #name                         = local.vng_gw_conn_name
+      virtual_network_gateway_resource_id = local.vng_gw_id
+      location                            = local.location
+      resource_group_name                 = local.resource_group_name
+      express_route_gateway_bypass        = true
     }
   }
 
   er_gw_connections = {
     connection-er = {
-      name                                 = "ExRConnection-westus2-er"
-      express_route_gateway_id             = local.vwan_gw_id
-      express_route_circuit_peering_id     = local.vng_gw_peering_id
-      peering_map_key                      = "firstPeeringConfig"
-      routeting_weight                     = 0
-      express_route_gateway_bypass_enabled = true
+      #name                                 = "ExRConnection-westus2-er"
+      express_route_gateway_resource_id         = local.vwan_gw_id
+      express_route_circuit_peering_resource_id = local.vng_gw_peering_id
+      peering_map_key                           = "firstPeeringConfig"
+      routeting_weight                          = 0
+      express_route_gateway_bypass_enabled      = true
       routing = {
-        inbound_route_map_id  = azurerm_route_map.in.id
-        outbound_route_map_id = azurerm_route_map.out.id
+        inbound_route_map_resource_id  = azurerm_route_map.in.id
+        outbound_route_map_resource_id = azurerm_route_map.out.id
         propagated_route_table = {
-          route_table_ids = [
+          route_table_resource_ids = [
             azurerm_virtual_hub_route_table.example.id,
             azurerm_virtual_hub_route_table.additional.id
           ]

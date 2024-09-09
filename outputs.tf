@@ -20,7 +20,6 @@ output "express_route_gateway_connections" {
   }
 }
 
-# https://azure.github.io/Azure-Verified-Modules/specs/terraform/#id-tffr2---category-outputs---additional-terraform-outputs
 output "name" {
   description = "The resource name of the ExpressRoute circuit."
   value       = azurerm_express_route_circuit.this.name
@@ -31,11 +30,6 @@ output "peerings" {
   value = {
     for key, value in azurerm_express_route_circuit_peering.this : key => value
   }
-}
-
-output "resource" {
-  description = "The Azure ExpressRoute circuit resource."
-  value       = azurerm_express_route_circuit.this
 }
 
 output "resource_id" {

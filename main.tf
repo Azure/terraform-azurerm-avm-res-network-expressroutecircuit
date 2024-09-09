@@ -58,10 +58,10 @@ resource "azurerm_virtual_network_gateway_connection" "this" {
   for_each = var.vnet_gw_connections
 
   location                     = each.value.location
-  name                         = each.value.name
+  name                         = coalesce(each.value.name, "con-${azurerm_express_route_circuit.this.name}-${regexall("[/\\w-\\.]+\\/([\\w-]+)", tostring(each.value.virtual_network_gateway_resource_id))[0][0]}")
   resource_group_name          = each.value.resource_group_name
   type                         = "ExpressRoute"
-  virtual_network_gateway_id   = each.value.virtual_network_gateway_id
+  virtual_network_gateway_id   = each.value.virtual_network_gateway_resource_id
   authorization_key            = each.value.authorization_key
   express_route_circuit_id     = azurerm_express_route_circuit.this.id
   express_route_gateway_bypass = each.value.express_route_gateway_bypass
@@ -78,27 +78,27 @@ resource "azurerm_virtual_network_gateway_connection" "this" {
 resource "azurerm_express_route_connection" "this" {
   for_each = var.er_gw_connections
 
-  express_route_circuit_peering_id     = coalesce(each.value.express_route_circuit_peering_id, try(azurerm_express_route_circuit_peering.this[each.value.peering_map_key].id, ""))
-  express_route_gateway_id             = each.value.express_route_gateway_id
-  name                                 = each.value.name
+  express_route_circuit_peering_id     = coalesce(each.value.express_route_circuit_peering_resource_id, try(azurerm_express_route_circuit_peering.this[each.value.peering_map_key].id, ""))
+  express_route_gateway_id             = each.value.express_route_gateway_resource_id
+  name                                 = coalesce(each.value.name, "con-${azurerm_express_route_circuit.this.name}-${regexall("[/\\w-\\.]+\\/([\\w-]+)", tostring(each.value.express_route_gateway_resource_id))[0][0]}")
   express_route_gateway_bypass_enabled = each.value.express_route_gateway_bypass_enabled
-  # private_link_fast_path_enabled       = each.value.private_link_fast_path_enabled # disabled due to bug #26746
+  # private_link_fast_path_enabled     = each.value.private_link_fast_path_enabled # disabled due to bug #26746
   routing_weight = each.value.routing_weight
 
   dynamic "routing" {
     for_each = each.value.routing != null ? [each.value.routing] : []
 
     content {
-      associated_route_table_id = routing.value.associated_route_table_id
-      inbound_route_map_id      = routing.value.inbound_route_map_id
-      outbound_route_map_id     = routing.value.outbound_route_map_id
+      associated_route_table_id = routing.value.associated_route_table_resource_id
+      inbound_route_map_id      = routing.value.inbound_route_map_resource_id
+      outbound_route_map_id     = routing.value.outbound_route_map_resource_id
 
       dynamic "propagated_route_table" {
         for_each = routing.value.propagated_route_table != null ? [routing.value.propagated_route_table] : []
 
         content {
           labels          = propagated_route_table.value.labels
-          route_table_ids = propagated_route_table.value.route_table_ids
+          route_table_ids = propagated_route_table.value.route_table_resource_ids
         }
       }
     }
