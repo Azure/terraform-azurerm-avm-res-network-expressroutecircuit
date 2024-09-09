@@ -123,7 +123,7 @@ module "exr_circuit_test" {
 
   vnet_gw_connections = {
     connection-gw = {
-      #name                         = local.vng_gw_conn_name
+      name                                = local.vng_gw_conn_name
       virtual_network_gateway_resource_id = local.vng_gw_id
       location                            = local.location
       resource_group_name                 = local.resource_group_name
