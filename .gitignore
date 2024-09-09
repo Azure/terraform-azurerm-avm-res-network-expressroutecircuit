@@ -53,3 +53,8 @@ avm.tflint_module.merged.hcl
 *.md.tmp
 # MacOS
 .DS_Store
+
+# Old/backup versions
+*.old
+*.bkp
+*.depricated
