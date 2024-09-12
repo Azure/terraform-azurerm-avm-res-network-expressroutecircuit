@@ -1,33 +1,41 @@
-# terraform-azurerm-avm-res-network-expressroutecircuit
+## Azure ExpressRoute Circuit Deployment Module
 
-This is a module for deploying an Azure Express Route Circuit with it's dependencies. 
-Make sure yopu check out the Azure [ExpressRoute Documentation](https://learn.microsoft.com/en-us/azure/expressroute/expressroute-introduction)!
+This module helps you deploy an Azure ExpressRoute Circuit and its related dependencies. Before using this module, be sure to review the official Azure [ExpressRoute Documentation](https://learn.microsoft.com/en-us/azure/expressroute/expressroute-introduction).
 
 > [!IMPORTANT]
-> As the overall AVM framework is not GA (generally available) yet - the CI framework and test automation is not fully functional and implemented across all supported languages yet - breaking changes are to be expected. 
+> As the overall AVM (Azure Virtual Machine) framework is not yet GA (Generally Available), the CI (Continuous Integration) framework and test automation may not be fully functional across all supported languages. **Breaking changes** are possible. 
 > 
-> However, it is important to note that this **DOES NOT** mean that the modules cannot be consumed and utilized. They **CAN** be leveraged in all types of environments (dev, test, prod etc.). Consumers can treat them just like any other IaC module and raise issues or feature requests against them as they learn from the usage of the module. Consumers should also read the release notes for each version, if considering updating to a more recent version of a module to see if there are any considerations or breaking changes etc.
+> However, this **DOES NOT** imply that the modules are unusable. These modules **CAN** be used in all environments—whether dev, test, or production. Treat them as you would any other Infrastructure-as-Code (IaC) module, and feel free to raise issues or request features as you use the module. Be sure to check the release notes before updating to newer versions to review any breaking changes or considerations.
 
-## Resources deployed by this module
+## Resources Deployed by this Module
 - ExpressRoute Circuit
 - ExpressRoute Circuit Peering
 - ExpressRoute Circuit Connection
-- Resource lock
-- IaM
-- Diagnostic settings
+- Resource Lock
+- IAM (Identity and Access Management)
+- Diagnostic Settings
 
-## Deployment order
-1. Deploy the circuit and extract the Service Key from the module output
-2. Work with your service provider to enable the circuit
-3. Once Circuit is in Provision State "Provisioned" yo can deploy the peering and all dependency services.
+## Deployment Process
 
-Note: If you try to deploy a peering before the circuit is in Provisioned state, the module will fail. From a Terraform perspective, we recommend to not provide any parameters for dependant resources (Peerings, Connections etc...) until after the circuit is provisioned, that way your terraform deployment will succeed and your state file will happy. 
+1. **Deploy the ExpressRoute Circuit**: Start by deploying the circuit. After deployment, extract the Service Key from the module's output.
+   
+2. **Work with Your Service Provider**: Share the Service Key with your service provider to activate the circuit.
+
+3. **Deploy Peering and Dependencies**: Once the circuit status is **Provisioned**, deploy the peering and any related services.
+
+> **Note**: If you attempt to deploy peering before the circuit is in the **Provisioned** state, the module deployment will fail. In Terraform, it’s recommended **not** to pass parameters for dependent resources (such as Peerings or Connections) until after the circuit is provisioned. This ensures a successful Terraform deployment and a stable state file.
 
 ## Known Limitations
-- The number of peerings is limited to 3 for existing customers with public peering, new customers should only deploy private or Microsoft peerings according to requirements. See retirement notice for Public Peering [here](https://azure.microsoft.com/en-us/updates/retirement-notice-migrate-from-public-peering-by-march-31-2024/)
-- Private link fast path is currently disabled due to known issue [#26746](https://github.com/hashicorp/terraform-provider-azurerm/issues/26746)
-- When deploying a connection to your gateway, make sure to differenciate between Virtual Network Gateway and ExpressRoute Gateway. The first is deployed in Virtual Networks and the latter in Virtual WAN. From a Terraform perspectrive, they are two different resources, so we seperated them by variable definition as well to make it easy to deploy.
-    - When deploying a connection to an ExpressRoute Gateway, the connection will require the Peerin ID. You can either provide the peering ID directly or you can supply the map object key you used to define the required peering in the module definition, take a look at the examples, it's a lot easier to show than to explain ;)
+
+- **Peering Limit**: The number of peerings is limited to three for existing customers using public peering. New customers should only deploy private or Microsoft peerings as per their requirements. Refer to the [retirement notice for Public Peering](https://azure.microsoft.com/en-us/updates/retirement-notice-migrate-from-public-peering-by-march-31-2024/).
+
+- **Private Link Fast Path**: Private link fast path is currently disabled due to a [known issue](https://github.com/hashicorp/terraform-provider-azurerm/issues/26746).
+
+- **Gateway Connection Clarification**: When deploying a connection, ensure that you distinguish between a **Virtual Network Gateway** and an **ExpressRoute Gateway**. The former is deployed in Virtual Networks, while the latter is used in Virtual WANs. In Terraform, they are represented as two different resource types, and we've separated them by variable definition for ease of deployment.
+   
+   - For connections to an ExpressRoute Gateway, you will need the Peering ID. You can either provide the Peering ID directly or use the key from the map object you defined in the module for the required peering. Refer to the examples in the module for more clarity, as it's easier to understand through the examples.
 
 ## Feedback
-- Your feedback is welcome! Please raise an issue or feature request on the module's GitHub repository.
+We welcome your feedback! If you encounter any issues or have feature requests, please raise them in the module’s GitHub repository.
+
+---
