@@ -1,23 +1,45 @@
 <!-- BEGIN_TF_DOCS -->
-# terraform-azurerm-avm-template
+## Azure ExpressRoute Circuit Deployment Module
 
-This is a template repo for Terraform Azure Verified Modules.
-
-Things to do:
-
-1. Set up a GitHub repo environment called `test`.
-1. Configure environment protection rule to ensure that approval is required before deploying to this environment.
-1. Create a user-assigned managed identity in your test subscription.
-1. Create a role assignment for the managed identity on your test subscription, use the minimum required role.
-1. Configure federated identity credentials on the user assigned managed identity. Use the GitHub environment.
-1. Search and update TODOs within the code and remove the TODO comments once complete.
+This module helps you deploy an Azure ExpressRoute Circuit and its related dependencies. Before using this module, be sure to review the official Azure [ExpressRoute Documentation](https://learn.microsoft.com/en-us/azure/expressroute/expressroute-introduction).
 
 > [!IMPORTANT]
-> As the overall AVM framework is not GA (generally available) yet - the CI framework and test automation is not fully functional and implemented across all supported languages yet - breaking changes are expected, and additional customer feedback is yet to be gathered and incorporated. Hence, modules **MUST NOT** be published at version `1.0.0` or higher at this time.
+> As the overall AVM (Azure Virtual Machine) framework is not yet GA (Generally Available), the CI (Continuous Integration) framework and test automation may not be fully functional across all supported languages. **Breaking changes** are possible.
 >
-> All module **MUST** be published as a pre-release version (e.g., `0.1.0`, `0.1.1`, `0.2.0`, etc.) until the AVM framework becomes GA.
->
-> However, it is important to note that this **DOES NOT** mean that the modules cannot be consumed and utilized. They **CAN** be leveraged in all types of environments (dev, test, prod etc.). Consumers can treat them just like any other IaC module and raise issues or feature requests against them as they learn from the usage of the module. Consumers should also read the release notes for each version, if considering updating to a more recent version of a module to see if there are any considerations or breaking changes etc.
+> However, this **DOES NOT** imply that the modules are unusable. These modules **CAN** be used in all environments—whether dev, test, or production. Treat them as you would any other Infrastructure-as-Code (IaC) module, and feel free to raise issues or request features as you use the module. Be sure to check the release notes before updating to newer versions to review any breaking changes or considerations.
+
+## Resources Deployed by this Module
+- ExpressRoute Circuit
+- ExpressRoute Circuit Peering
+- ExpressRoute Circuit Connection
+- Resource Lock
+- IAM (Identity and Access Management)
+- Diagnostic Settings
+
+## Deployment Process
+
+1. **Deploy the ExpressRoute Circuit**: Start by deploying the circuit. After deployment, extract the Service Key from the module's output.
+   
+2. **Work with Your Service Provider**: Share the Service Key with your service provider to activate the circuit.
+
+3. **Deploy Peering and Dependencies**: Once the circuit status is **Provisioned**, deploy the peering and any related services.
+
+> **Note**: If you attempt to deploy peering before the circuit is in the **Provisioned** state, the module deployment will fail. In Terraform, it’s recommended **not** to pass parameters for dependent resources (such as Peerings or Connections) until after the circuit is provisioned. This ensures a successful Terraform deployment and a stable state file.
+
+## Known Limitations
+
+- **Peering Limit**: The number of peerings is limited to three for existing customers using public peering. New customers should only deploy private or Microsoft peerings as per their requirements. Refer to the [retirement notice for Public Peering](https://azure.microsoft.com/en-us/updates/retirement-notice-migrate-from-public-peering-by-march-31-2024/).
+
+- **Private Link Fast Path**: Private link fast path is currently disabled due to a [known issue](https://github.com/hashicorp/terraform-provider-azurerm/issues/26746).
+
+- **Gateway Connection Clarification**: When deploying a connection, ensure that you distinguish between a **Virtual Network Gateway** and an **ExpressRoute Gateway**. The former is deployed in Virtual Networks, while the latter is used in Virtual WANs. In Terraform, they are represented as two different resource types, and we've separated them by variable definition for ease of deployment.
+   
+   - For connections to an ExpressRoute Gateway, you will need the Peering ID. You can either provide the Peering ID directly or use the key from the map object you defined in the module for the required peering. Refer to the examples in the module for more clarity, as it's easier to understand through the examples.
+
+## Feedback
+We welcome your feedback! If you encounter any issues or have feature requests, please raise them in the module’s GitHub repository.
+
+---
 
 <!-- markdownlint-disable MD033 -->
 ## Requirements
@@ -26,7 +48,9 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.5)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.71)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (> 3.71, <= 3.99.0)
+
+- <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
@@ -34,16 +58,18 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
+- [azurerm_express_route_circuit.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_circuit) (resource)
+- [azurerm_express_route_circuit_authorization.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_circuit_authorization) (resource)
+- [azurerm_express_route_circuit_peering.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_circuit_peering) (resource)
+- [azurerm_express_route_connection.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_connection) (resource)
 - [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
-- [azurerm_private_endpoint.this_managed_dns_zone_groups](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
-- [azurerm_private_endpoint.this_unmanaged_dns_zone_groups](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
-- [azurerm_private_endpoint_application_security_group_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint_application_security_group_association) (resource)
-- [azurerm_resource_group.TODO](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [azurerm_monitor_diagnostic_setting.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) (resource)
 - [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
-- [modtm_telemetry.telemetry](https://registry.terraform.io/providers/hashicorp/modtm/latest/docs/resources/telemetry) (resource)
+- [azurerm_virtual_network_gateway_connection.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network_gateway_connection) (resource)
+- [modtm_telemetry.telemetry](https://registry.terraform.io/providers/Azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [azurerm_client_config.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
-- [modtm_module_source.telemetry](https://registry.terraform.io/providers/hashicorp/modtm/latest/docs/data-sources/module_source) (data source)
+- [modtm_module_source.telemetry](https://registry.terraform.io/providers/Azure/modtm/latest/docs/data-sources/module_source) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
@@ -52,25 +78,82 @@ The following input variables are required:
 
 ### <a name="input_location"></a> [location](#input\_location)
 
-Description: Azure region where the resource should be deployed.
+Description:   (Required) The location of the ExpressRoute Circuit. Changing this forces a new resource to be created.
 
 Type: `string`
 
 ### <a name="input_name"></a> [name](#input\_name)
 
-Description: The name of the this resource.
+Description:   (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
+
+Type: `string`
+
+### <a name="input_peering_location"></a> [peering\_location](#input\_peering\_location)
+
+Description:   (Required) The peering location.
 
 Type: `string`
 
 ### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
 
-Description: The resource group where the resources will be deployed.
+Description: (Required) The name of the resource group where the resources will be deployed.
 
 Type: `string`
+
+### <a name="input_service_provider_name"></a> [service\_provider\_name](#input\_service\_provider\_name)
+
+Description:   (Required) The name of the service provider.
+
+Type: `string`
+
+### <a name="input_sku"></a> [sku](#input\_sku)
+
+Description:   (Required) The SKU of the ExpressRoute Circuit.
+
+Type:
+
+```hcl
+object({
+    tier   = string
+    family = string
+  })
+```
 
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_allow_classic_operations"></a> [allow\_classic\_operations](#input\_allow\_classic\_operations)
+
+Description:   (Optional) Allow classic operations.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_authorization_key"></a> [authorization\_key](#input\_authorization\_key)
+
+Description:   (Optional) The authorization key of the ExpressRoute Circuit.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_bandwidth_in_gbps"></a> [bandwidth\_in\_gbps](#input\_bandwidth\_in\_gbps)
+
+Description:   (Optional) The bandwidth in Gbps.
+
+Type: `number`
+
+Default: `null`
+
+### <a name="input_bandwidth_in_mbps"></a> [bandwidth\_in\_mbps](#input\_bandwidth\_in\_mbps)
+
+Description:   (Optional) The bandwidth in Mbps.
+
+Type: `number`
+
+Default: `null`
 
 ### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
 
@@ -140,6 +223,123 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_er_gw_connections"></a> [er\_gw\_connections](#input\_er\_gw\_connections)
+
+Description:     (Optional) A map of association objects to create connections between the created circuit and the designated gateways.
+
+    - `name` - (Required) The name of the connection.
+    - `express_route_circuit_peering_resource_id` - (Optional) The id of the peering to associate to. Note: Either `express_route_circuit_peering_resource_id` or `peering_map_key` must be set.
+    - `peering_map_key` - (Optional) The key of the peering variable to associate to. Note: Either `peering_map_key` or `express_route_circuit_peering_resource_id` or must be set.
+    - `express_route_gateway_resource_id` - (Required) Resource ID of the Express Route Gateway.
+    - `authorization_key` - (Optional) The authorization key to establish the Express Route Connection.
+    - `enable_internet_security` - (Optional) Set Internet security for this Express Route Connection.
+    - `express_route_gateway_bypass_enabled` - (Optional) Specified whether Fast Path is enabled for Virtual Wan Firewall Hub. Defaults to false.
+    - `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express\_route\_gateway\_bypass\_enabled must be set to true. Defaults to false.
+    - `routing_weight` - (Optional) The routing weight associated to the Express Route Connection. Possible value is between 0 and 32000. Defaults to 0.
+    - `routing` - (Optional) A routing block.
+      - `associated_route_table_resource_id` - (Optional) The ID of the Virtual Hub Route Table associated with this Express Route Connection.
+      - `inbound_route_map_resource_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for inbound routes.
+      - `outbound_route_map_resource_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for outbound routes.
+      - `propagated_route_table` - (Optional) A propagated\_route\_table block.
+        - `labels` - (Optional) The list of labels to logically group route tables.
+        - `route_table_resource_ids` - (Optional) A list of IDs of the Virtual Hub Route Table to propagate routes from Express Route Connection to the route table.
+
+    Example Input:
+
+```terraform
+    er_gw_connections = {
+    connection1er = {
+      name                             = "ExRConnection-westus2-er"
+      express_route_gateway_resource_id         = local.same_rg_er_gw_resource_id
+      express_route_circuit_peering_resource_id = local.same_rg_er_peering_resource_id
+      peering_map_key = "firstPeeringConfig"
+      routeting_weight = 0
+      routing = {
+        inbound_route_map_resource_id         = azurerm_route_map.in.id
+        outbound_route_map_resource_id        = azurerm_route_map.out.id
+        propagated_route_table = {
+          route_table_resource_ids = [
+            azurerm_virtual_hub_route_table.example.id,
+            azurerm_virtual_hub_route_table.additional.id
+          ]
+        }
+      }
+    }
+  }
+```
+
+Type:
+
+```hcl
+map(object({
+    name                                      = optional(string, "")
+    express_route_circuit_peering_resource_id = optional(string, null)
+    peering_map_key                           = optional(string, null)
+    express_route_gateway_resource_id         = string
+    authorization_key                         = optional(string, null)
+    enable_internet_security                  = optional(bool, false)
+    express_route_gateway_bypass_enabled      = optional(bool, false)
+    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
+    routing_weight = optional(number, 0)
+    routing = optional(object({
+      associated_route_table_resource_id = optional(string)
+      inbound_route_map_resource_id      = optional(string)
+      outbound_route_map_resource_id     = optional(string)
+      propagated_route_table = object({
+        labels                   = optional(list(string), null)
+        route_table_resource_ids = optional(list(string), null)
+      })
+    }), null)
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_express_route_circuit_authorizations"></a> [express\_route\_circuit\_authorizations](#input\_express\_route\_circuit\_authorizations)
+
+Description:     (Optional) A map of authorization objects to create authorizations for the ExpressRoute Circuits.
+
+    - `name` - (Required) The name of the authorization.
+
+    Example Input:
+
+```terraform
+    express_route_circuit_authorizations = {
+      authorization1 = {
+        name              = "authorization1"
+      },
+      authorization2 = {
+        name              = "azurerm_express_route_gateway.some_gateway.name-authorization"
+      }
+    }
+```
+
+Type:
+
+```hcl
+map(object({
+    name = string
+  }))
+```
+
+Default: `{}`
+
+### <a name="input_express_route_port_resource_id"></a> [express\_route\_port\_resource\_id](#input\_express\_route\_port\_resource\_id)
+
+Description:   (Optional) The ID of the ExpressRoute Port.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_exr_circuit_tags"></a> [exr\_circuit\_tags](#input\_exr\_circuit\_tags)
+
+Description:   (Optional) A mapping of tags to assign to the ExpressRoute Circuit.
+
+Type: `map(string)`
+
+Default: `null`
+
 ### <a name="input_lock"></a> [lock](#input\_lock)
 
 Description: Controls the Resource Lock configuration for this resource. The following properties can be specified:
@@ -158,87 +358,98 @@ object({
 
 Default: `null`
 
-### <a name="input_managed_identities"></a> [managed\_identities](#input\_managed\_identities)
+### <a name="input_peerings"></a> [peerings](#input\_peerings)
 
-Description: Controls the Managed Identity configuration on this resource. The following properties can be specified:
+Description:     (Optional) A map of association objects to create peerings between the created circuit and the designated gateways.
 
-- `system_assigned` - (Optional) Specifies if the System Assigned Managed Identity should be enabled.
-- `user_assigned_resource_ids` - (Optional) Specifies a list of User Assigned Managed Identity resource IDs to be assigned to this resource.
+    - `peering_type` - (Required) The type of peering. Possible values are `AzurePrivatePeering`, `AzurePublicPeering`, and `MicrosoftPeering`.
+    - `vlan_id` - (Required) The VLAN ID for the peering.
+    - `primary_peer_address_prefix` - (Optional) The primary peer address prefix.
+    - `secondary_peer_address_prefix` - (Optional) The secondary peer address prefix.
+    - `ipv4_enabled` - (Optional) Is IPv4 enabled for this peering. Defaults to `true`.
+    - `shared_key` - (Optional) The shared key for the peering.
+    - `peer_asn` - (Optional) The peer ASN.
+    - `route_filter_id` - (Optional) The ID of the route filter to associate with the peering.
+    - `microsoft_peering_config` - (Optional) A map of Microsoft peering configuration settings.
+    - `ipv6` - (Optional) A map of IPv6 peering configuration settings.
 
-Type:
+    Example Input:
 
-```hcl
-object({
-    system_assigned            = optional(bool, false)
-    user_assigned_resource_ids = optional(set(string), [])
-  })
+```terraform
+    peerings = {
+      PrivatePeering = {
+        peering_type                  = "AzurePrivatePeering"
+        peer_asn                      = 100
+        primary_peer_address_prefix   = "10.0.0.0/30"
+        secondary_peer_address_prefix = "10.0.0.4/30"
+        ipv4_enabled                  = true
+        vlan_id                       = 300
+
+        ipv6 {
+          primary_peer_address_prefix   = "2002:db01::/126"
+          secondary_peer_address_prefix = "2003:db01::/126"
+          enabled                       = true
+        }
+      },
+      MicrosoftPeering = {
+        peering_type                  = "MicrosoftPeering"
+        peer_asn                      = 200
+        primary_peer_address_prefix   = "123.0.0.0/30"
+        secondary_peer_address_prefix = "123.0.0.4/30"
+        ipv4_enabled                  = true
+        vlan_id                       = 400
+
+        microsoft_peering_config {
+          advertised_public_prefixes = ["123.1.0.0/24"]
+        }
+
+        ipv6 {
+          primary_peer_address_prefix   = "2002:db01::/126"
+          secondary_peer_address_prefix = "2003:db01::/126"
+          enabled                       = true
+
+          microsoft_peering {
+            advertised_public_prefixes = ["2002:db01::/126"]
+          }
+        }
+      }
+    }
 ```
-
-Default: `{}`
-
-### <a name="input_private_endpoints"></a> [private\_endpoints](#input\_private\_endpoints)
-
-Description: A map of private endpoints to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-
-- `name` - (Optional) The name of the private endpoint. One will be generated if not set.
-- `role_assignments` - (Optional) A map of role assignments to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time. See `var.role_assignments` for more information.
-- `lock` - (Optional) The lock level to apply to the private endpoint. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
-- `tags` - (Optional) A mapping of tags to assign to the private endpoint.
-- `subnet_resource_id` - The resource ID of the subnet to deploy the private endpoint in.
-- `private_dns_zone_group_name` - (Optional) The name of the private DNS zone group. One will be generated if not set.
-- `private_dns_zone_resource_ids` - (Optional) A set of resource IDs of private DNS zones to associate with the private endpoint. If not set, no zone groups will be created and the private endpoint will not be associated with any private DNS zones. DNS records must be managed external to this module.
-- `application_security_group_resource_ids` - (Optional) A map of resource IDs of application security groups to associate with the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-- `private_service_connection_name` - (Optional) The name of the private service connection. One will be generated if not set.
-- `network_interface_name` - (Optional) The name of the network interface. One will be generated if not set.
-- `location` - (Optional) The Azure location where the resources will be deployed. Defaults to the location of the resource group.
-- `resource_group_name` - (Optional) The resource group where the resources will be deployed. Defaults to the resource group of this resource.
-- `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. If not specified the platform will create one. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-  - `name` - The name of the IP configuration.
-  - `private_ip_address` - The private IP address of the IP configuration.
 
 Type:
 
 ```hcl
 map(object({
-    name = optional(string, null)
-    role_assignments = optional(map(object({
-      role_definition_id_or_name             = string
-      principal_id                           = string
-      description                            = optional(string, null)
-      skip_service_principal_aad_check       = optional(bool, false)
-      condition                              = optional(string, null)
-      condition_version                      = optional(string, null)
-      delegated_managed_identity_resource_id = optional(string, null)
-    })), {})
-    lock = optional(object({
-      kind = string
-      name = optional(string, null)
+    peering_type                  = string
+    vlan_id                       = number
+    primary_peer_address_prefix   = optional(string, null)
+    secondary_peer_address_prefix = optional(string, null)
+    ipv4_enabled                  = optional(bool, true)
+    shared_key                    = optional(string, null)
+    peer_asn                      = optional(number, null)
+    route_filter_id               = optional(string, null)
+    microsoft_peering_config = optional(object({
+      advertised_public_prefixes = list(string)
+      customer_asn               = optional(number, null)
+      routing_registry_name      = optional(string, "NONE")
+      advertised_communities     = optional(list(string), null)
     }), null)
-    tags                                    = optional(map(string), null)
-    subnet_resource_id                      = string
-    private_dns_zone_group_name             = optional(string, "default")
-    private_dns_zone_resource_ids           = optional(set(string), [])
-    application_security_group_associations = optional(map(string), {})
-    private_service_connection_name         = optional(string, null)
-    network_interface_name                  = optional(string, null)
-    location                                = optional(string, null)
-    resource_group_name                     = optional(string, null)
-    ip_configurations = optional(map(object({
-      name               = string
-      private_ip_address = string
-    })), {})
+    ipv6 = optional(object({
+      primary_peer_address_prefix   = string
+      secondary_peer_address_prefix = string
+      enabled                       = optional(bool, true)
+      route_filter_id               = optional(string, null)
+      microsoft_peering = optional(object({
+        advertised_public_prefixes = optional(list(string))
+        customer_asn               = optional(number, null)
+        routing_registry_name      = optional(string, "NONE")
+        advertised_communities     = optional(list(string), null)
+      }), null)
+    }), null)
   }))
 ```
 
 Default: `{}`
-
-### <a name="input_private_endpoints_manage_dns_zone_group"></a> [private\_endpoints\_manage\_dns\_zone\_group](#input\_private\_endpoints\_manage\_dns\_zone\_group)
-
-Description: Whether to manage private DNS zone groups with this module. If set to false, you must manage private DNS zone groups externally, e.g. using Azure Policy.
-
-Type: `bool`
-
-Default: `true`
 
 ### <a name="input_role_assignments"></a> [role\_assignments](#input\_role\_assignments)
 
@@ -264,6 +475,7 @@ map(object({
     condition                              = optional(string, null)
     condition_version                      = optional(string, null)
     delegated_managed_identity_resource_id = optional(string, null)
+    principal_type                         = optional(string, null)
   }))
 ```
 
@@ -277,17 +489,83 @@ Type: `map(string)`
 
 Default: `null`
 
+### <a name="input_vnet_gw_connections"></a> [vnet\_gw\_connections](#input\_vnet\_gw\_connections)
+
+Description:     (Optional) A map of association objects to create connections between the created circuit and the designated gateways.
+
+    - `name` - (Required) The name of the connection.
+    - `resource_group_name` - (Required) The name of the resource group in which to create the connection Changing this forces a new resource to be created.
+    - `location` - (Required) The location/region where the connection is located.
+    - `virtual_network_gateway_resource_id` - (Required) The ID of the Virtual Network Gateway in which the connection will be created.
+    - `authorization_key` - (Optional) The authorization key associated with the Express Route Circuit.
+    - `routing_weight` - (Optional) The routing weight. Defaults to 0.
+    - `express_route_gateway_bypass` - (Optional) If true, data packets will bypass ExpressRoute Gateway for data forwarding.
+    - `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express\_route\_gateway\_bypass must be set to true. Defaults to false.
+    - `tags` - (Optional) A mapping of tags to assign to the resource.
+
+    Example Input:
+
+```terraform
+  vnet_gw_connections = {
+    connection1gw = {
+      name                       = local.same_rg_conn_name
+      virtual_network_gateway_resource_id = local.same_rg_gw_resource_id
+      location                   = local.location
+      resource_group_name        = local.resource_group_name
+    }
+  }
+```
+
+Type:
+
+```hcl
+map(object({
+    name                                = optional(string, "")
+    resource_group_name                 = string
+    location                            = string
+    virtual_network_gateway_resource_id = string
+    authorization_key                   = optional(string, null)
+    routing_weight                      = optional(number, 0)
+    express_route_gateway_bypass        = optional(bool, false)
+    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
+    shared_key = optional(string, null)
+    tags       = optional(map(string), null)
+  }))
+```
+
+Default: `{}`
+
 ## Outputs
 
 The following outputs are exported:
 
-### <a name="output_private_endpoints"></a> [private\_endpoints](#output\_private\_endpoints)
+### <a name="output_authorisation_keys"></a> [authorisation\_keys](#output\_authorisation\_keys)
 
-Description:   A map of the private endpoints created.
+Description: Authorisation keys for the ExpressRoute circuit.
 
-### <a name="output_resource"></a> [resource](#output\_resource)
+### <a name="output_authorisation_used_status"></a> [authorisation\_used\_status](#output\_authorisation\_used\_status)
 
-Description: This is the full output for the resource.
+Description: Authorisation used status.
+
+### <a name="output_express_route_gateway_connections"></a> [express\_route\_gateway\_connections](#output\_express\_route\_gateway\_connections)
+
+Description: ExpressRoute gateway connections.
+
+### <a name="output_name"></a> [name](#output\_name)
+
+Description: The resource name of the ExpressRoute circuit.
+
+### <a name="output_peerings"></a> [peerings](#output\_peerings)
+
+Description: ExpressRoute Circuit peering configurations.
+
+### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
+
+Description: The resource ID of the ExpressRoute circuit.
+
+### <a name="output_virtual_network_gateway_connections"></a> [virtual\_network\_gateway\_connections](#output\_virtual\_network\_gateway\_connections)
+
+Description: Virtual network gateway connections.
 
 ## Modules
 

@@ -5,6 +5,12 @@
 *.tfstate
 *.tfstate.*
 
+# terraform plan file
+plan
+
+# debug output file
+output.txt
+
 # Crash log files
 crash.log
 crash.*.log
@@ -47,3 +53,8 @@ avm.tflint_module.merged.hcl
 *.md.tmp
 # MacOS
 .DS_Store
+
+# Old/backup versions
+*.old
+*.bkp
+*.depricated

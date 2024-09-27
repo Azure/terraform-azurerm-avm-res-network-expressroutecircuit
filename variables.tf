@@ -1,25 +1,92 @@
 variable "location" {
   type        = string
-  description = "Azure region where the resource should be deployed."
+  description = <<DESCRIPTION
+  (Required) The location of the ExpressRoute Circuit. Changing this forces a new resource to be created.
+DESCRIPTION
   nullable    = false
 }
 
 variable "name" {
   type        = string
-  description = "The name of the this resource."
+  description = <<DESCRIPTION
+  (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
+DESCRIPTION
+}
+
+variable "peering_location" {
+  type        = string
+  description = <<DESCRIPTION
+  (Required) The peering location.
+DESCRIPTION
+  nullable    = false
+}
+
+variable "resource_group_name" {
+  type        = string
+  description = <<DESCRIPTION
+(Required) The name of the resource group where the resources will be deployed. 
+DESCRIPTION  
+  nullable    = false
+}
+
+variable "service_provider_name" {
+  type        = string
+  description = <<DESCRIPTION
+  (Required) The name of the service provider.
+DESCRIPTION
+  nullable    = false
+}
+
+variable "sku" {
+  type = object({
+    tier   = string
+    family = string
+  })
+  description = <<DESCRIPTION
+  (Required) The SKU of the ExpressRoute Circuit.
+DESCRIPTION
+  nullable    = false
 
   validation {
-    condition     = can(regex("TODO", var.name))
-    error_message = "The name must be TODO." # TODO remove the example below once complete:
-    #condition     = can(regex("^[a-z0-9]{5,50}$", var.name))
-    #error_message = "The name must be between 5 and 50 characters long and can only contain lowercase letters and numbers."
+    condition     = contains(["Local", "Standard", "Premium"], var.sku.tier)
+    error_message = "The SKU tier must be either 'Local', 'Standard', or 'Premium'."
+  }
+  validation {
+    condition     = contains(["MeteredData", "UnlimitedData"], var.sku.family)
+    error_message = "The SKU family must be either 'MeteredData' or 'UnlimitedData'."
   }
 }
 
-# This is required for most resource modules
-variable "resource_group_name" {
+variable "allow_classic_operations" {
+  type        = bool
+  default     = false
+  description = <<DESCRIPTION
+  (Optional) Allow classic operations.
+DESCRIPTION
+}
+
+variable "authorization_key" {
   type        = string
-  description = "The resource group where the resources will be deployed."
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) The authorization key of the ExpressRoute Circuit.
+DESCRIPTION
+}
+
+variable "bandwidth_in_gbps" {
+  type        = number
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) The bandwidth in Gbps.
+DESCRIPTION
+}
+
+variable "bandwidth_in_mbps" {
+  type        = number
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) The bandwidth in Mbps.
+DESCRIPTION
 }
 
 # required AVM interfaces
@@ -100,6 +167,124 @@ If it is set to false, then no telemetry will be collected.
 DESCRIPTION
 }
 
+variable "er_gw_connections" {
+  type = map(object({
+    name                                      = optional(string, "")
+    express_route_circuit_peering_resource_id = optional(string, null)
+    peering_map_key                           = optional(string, null)
+    express_route_gateway_resource_id         = string
+    authorization_key                         = optional(string, null)
+    enable_internet_security                  = optional(bool, false)
+    express_route_gateway_bypass_enabled      = optional(bool, false)
+    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
+    routing_weight = optional(number, 0)
+    routing = optional(object({
+      associated_route_table_resource_id = optional(string)
+      inbound_route_map_resource_id      = optional(string)
+      outbound_route_map_resource_id     = optional(string)
+      propagated_route_table = object({
+        labels                   = optional(list(string), null)
+        route_table_resource_ids = optional(list(string), null)
+      })
+    }), null)
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+    (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
+
+    - `name` - (Required) The name of the connection.
+    - `express_route_circuit_peering_resource_id` - (Optional) The id of the peering to associate to. Note: Either `express_route_circuit_peering_resource_id` or `peering_map_key` must be set.
+    - `peering_map_key` - (Optional) The key of the peering variable to associate to. Note: Either `peering_map_key` or `express_route_circuit_peering_resource_id` or must be set.
+    - `express_route_gateway_resource_id` - (Required) Resource ID of the Express Route Gateway.
+    - `authorization_key` - (Optional) The authorization key to establish the Express Route Connection.
+    - `enable_internet_security` - (Optional) Set Internet security for this Express Route Connection.
+    - `express_route_gateway_bypass_enabled` - (Optional) Specified whether Fast Path is enabled for Virtual Wan Firewall Hub. Defaults to false.
+    - `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass_enabled must be set to true. Defaults to false.
+    - `routing_weight` - (Optional) The routing weight associated to the Express Route Connection. Possible value is between 0 and 32000. Defaults to 0.
+    - `routing` - (Optional) A routing block.
+      - `associated_route_table_resource_id` - (Optional) The ID of the Virtual Hub Route Table associated with this Express Route Connection.
+      - `inbound_route_map_resource_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for inbound routes.
+      - `outbound_route_map_resource_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for outbound routes.
+      - `propagated_route_table` - (Optional) A propagated_route_table block.
+        - `labels` - (Optional) The list of labels to logically group route tables.
+        - `route_table_resource_ids` - (Optional) A list of IDs of the Virtual Hub Route Table to propagate routes from Express Route Connection to the route table.
+
+    Example Input:
+
+```terraform
+    er_gw_connections = {
+    connection1er = {
+      name                             = "ExRConnection-westus2-er"
+      express_route_gateway_resource_id         = local.same_rg_er_gw_resource_id
+      express_route_circuit_peering_resource_id = local.same_rg_er_peering_resource_id
+      peering_map_key = "firstPeeringConfig"
+      routeting_weight = 0
+      routing = {
+        inbound_route_map_resource_id         = azurerm_route_map.in.id
+        outbound_route_map_resource_id        = azurerm_route_map.out.id
+        propagated_route_table = {
+          route_table_resource_ids = [
+            azurerm_virtual_hub_route_table.example.id,
+            azurerm_virtual_hub_route_table.additional.id
+          ]
+        }
+      }
+    }
+  }
+```
+  DESCRIPTION
+
+  validation {
+    condition     = alltrue([for connection in var.er_gw_connections : connection.express_route_circuit_peering_resource_id != null || connection.peering_map_key != null])
+    error_message = "Either 'express_route_circuit_peering_resource_id' or 'peering_map_key' must be set for each entry in 'er_gw_connections'."
+  }
+  validation {
+    condition     = alltrue([for connection in var.er_gw_connections : connection.routing_weight >= 0 && connection.routing_weight <= 32000])
+    error_message = "routing_weight must be between 0 and 32000."
+  }
+}
+
+variable "express_route_circuit_authorizations" {
+  type = map(object({
+    name = string
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+    (Optional) A map of authorization objects to create authorizations for the ExpressRoute Circuits. 
+
+    - `name` - (Required) The name of the authorization.
+
+    Example Input:
+
+```terraform
+    express_route_circuit_authorizations = {
+      authorization1 = {
+        name              = "authorization1"
+      },
+      authorization2 = {
+        name              = "azurerm_express_route_gateway.some_gateway.name-authorization" 
+      }
+    }
+```
+  DESCRIPTION
+}
+
+variable "express_route_port_resource_id" {
+  type        = string
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) The ID of the ExpressRoute Port.
+DESCRIPTION
+}
+
+variable "exr_circuit_tags" {
+  type        = map(string)
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) A mapping of tags to assign to the ExpressRoute Circuit.
+DESCRIPTION
+}
+
 variable "lock" {
   type = object({
     kind = string
@@ -119,84 +304,117 @@ DESCRIPTION
   }
 }
 
-# tflint-ignore: terraform_unused_declarations
-variable "managed_identities" {
-  type = object({
-    system_assigned            = optional(bool, false)
-    user_assigned_resource_ids = optional(set(string), [])
-  })
-  default     = {}
-  description = <<DESCRIPTION
-Controls the Managed Identity configuration on this resource. The following properties can be specified:
-
-- `system_assigned` - (Optional) Specifies if the System Assigned Managed Identity should be enabled.
-- `user_assigned_resource_ids` - (Optional) Specifies a list of User Assigned Managed Identity resource IDs to be assigned to this resource.
-DESCRIPTION
-  nullable    = false
-}
-
-variable "private_endpoints" {
+variable "peerings" {
   type = map(object({
-    name = optional(string, null)
-    role_assignments = optional(map(object({
-      role_definition_id_or_name             = string
-      principal_id                           = string
-      description                            = optional(string, null)
-      skip_service_principal_aad_check       = optional(bool, false)
-      condition                              = optional(string, null)
-      condition_version                      = optional(string, null)
-      delegated_managed_identity_resource_id = optional(string, null)
-    })), {})
-    lock = optional(object({
-      kind = string
-      name = optional(string, null)
+    peering_type                  = string
+    vlan_id                       = number
+    primary_peer_address_prefix   = optional(string, null)
+    secondary_peer_address_prefix = optional(string, null)
+    ipv4_enabled                  = optional(bool, true)
+    shared_key                    = optional(string, null)
+    peer_asn                      = optional(number, null)
+    route_filter_id               = optional(string, null)
+    microsoft_peering_config = optional(object({
+      advertised_public_prefixes = list(string)
+      customer_asn               = optional(number, null)
+      routing_registry_name      = optional(string, "NONE")
+      advertised_communities     = optional(list(string), null)
     }), null)
-    tags                                    = optional(map(string), null)
-    subnet_resource_id                      = string
-    private_dns_zone_group_name             = optional(string, "default")
-    private_dns_zone_resource_ids           = optional(set(string), [])
-    application_security_group_associations = optional(map(string), {})
-    private_service_connection_name         = optional(string, null)
-    network_interface_name                  = optional(string, null)
-    location                                = optional(string, null)
-    resource_group_name                     = optional(string, null)
-    ip_configurations = optional(map(object({
-      name               = string
-      private_ip_address = string
-    })), {})
+    ipv6 = optional(object({
+      primary_peer_address_prefix   = string
+      secondary_peer_address_prefix = string
+      enabled                       = optional(bool, true)
+      route_filter_id               = optional(string, null)
+      microsoft_peering = optional(object({
+        advertised_public_prefixes = optional(list(string))
+        customer_asn               = optional(number, null)
+        routing_registry_name      = optional(string, "NONE")
+        advertised_communities     = optional(list(string), null)
+      }), null)
+    }), null)
   }))
   default     = {}
   description = <<DESCRIPTION
-A map of private endpoints to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+    (Optional) A map of association objects to create peerings between the created circuit and the designated gateways. 
 
-- `name` - (Optional) The name of the private endpoint. One will be generated if not set.
-- `role_assignments` - (Optional) A map of role assignments to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time. See `var.role_assignments` for more information.
-- `lock` - (Optional) The lock level to apply to the private endpoint. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
-- `tags` - (Optional) A mapping of tags to assign to the private endpoint.
-- `subnet_resource_id` - The resource ID of the subnet to deploy the private endpoint in.
-- `private_dns_zone_group_name` - (Optional) The name of the private DNS zone group. One will be generated if not set.
-- `private_dns_zone_resource_ids` - (Optional) A set of resource IDs of private DNS zones to associate with the private endpoint. If not set, no zone groups will be created and the private endpoint will not be associated with any private DNS zones. DNS records must be managed external to this module.
-- `application_security_group_resource_ids` - (Optional) A map of resource IDs of application security groups to associate with the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-- `private_service_connection_name` - (Optional) The name of the private service connection. One will be generated if not set.
-- `network_interface_name` - (Optional) The name of the network interface. One will be generated if not set.
-- `location` - (Optional) The Azure location where the resources will be deployed. Defaults to the location of the resource group.
-- `resource_group_name` - (Optional) The resource group where the resources will be deployed. Defaults to the resource group of this resource.
-- `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. If not specified the platform will create one. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-  - `name` - The name of the IP configuration.
-  - `private_ip_address` - The private IP address of the IP configuration.
-DESCRIPTION
-  nullable    = false
-}
+    - `peering_type` - (Required) The type of peering. Possible values are `AzurePrivatePeering`, `AzurePublicPeering`, and `MicrosoftPeering`.
+    - `vlan_id` - (Required) The VLAN ID for the peering.
+    - `primary_peer_address_prefix` - (Optional) The primary peer address prefix.
+    - `secondary_peer_address_prefix` - (Optional) The secondary peer address prefix.
+    - `ipv4_enabled` - (Optional) Is IPv4 enabled for this peering. Defaults to `true`.
+    - `shared_key` - (Optional) The shared key for the peering.
+    - `peer_asn` - (Optional) The peer ASN.
+    - `route_filter_id` - (Optional) The ID of the route filter to associate with the peering.
+    - `microsoft_peering_config` - (Optional) A map of Microsoft peering configuration settings.
+    - `ipv6` - (Optional) A map of IPv6 peering configuration settings.
 
-# This variable is used to determine if the private_dns_zone_group block should be included,
-# or if it is to be managed externally, e.g. using Azure Policy.
-# https://github.com/Azure/terraform-azurerm-avm-res-keyvault-vault/issues/32
-# Alternatively you can use AzAPI, which does not have this issue.
-variable "private_endpoints_manage_dns_zone_group" {
-  type        = bool
-  default     = true
-  description = "Whether to manage private DNS zone groups with this module. If set to false, you must manage private DNS zone groups externally, e.g. using Azure Policy."
-  nullable    = false
+    Example Input:
+
+```terraform
+    peerings = {
+      PrivatePeering = {
+        peering_type                  = "AzurePrivatePeering"
+        peer_asn                      = 100
+        primary_peer_address_prefix   = "10.0.0.0/30"
+        secondary_peer_address_prefix = "10.0.0.4/30"
+        ipv4_enabled                  = true
+        vlan_id                       = 300
+
+        ipv6 {
+          primary_peer_address_prefix   = "2002:db01::/126"
+          secondary_peer_address_prefix = "2003:db01::/126"
+          enabled                       = true
+        }
+      },
+      MicrosoftPeering = {
+        peering_type                  = "MicrosoftPeering"
+        peer_asn                      = 200
+        primary_peer_address_prefix   = "123.0.0.0/30"
+        secondary_peer_address_prefix = "123.0.0.4/30"
+        ipv4_enabled                  = true
+        vlan_id                       = 400
+
+        microsoft_peering_config {
+          advertised_public_prefixes = ["123.1.0.0/24"]
+        }
+
+        ipv6 {
+          primary_peer_address_prefix   = "2002:db01::/126"
+          secondary_peer_address_prefix = "2003:db01::/126"
+          enabled                       = true
+
+          microsoft_peering {
+            advertised_public_prefixes = ["2002:db01::/126"]
+          }
+        }
+      }
+    }
+```
+  DESCRIPTION
+
+  validation {
+    condition     = alltrue([for peering in var.peerings : contains(["AzurePrivatePeering", "AzurePublicPeering", "MicrosoftPeering"], peering.peering_type)])
+    error_message = "The peering type must be one of: 'AzurePrivatePeering', 'AzurePublicPeering', or 'MicrosoftPeering'."
+  }
+  validation {
+    condition     = alltrue([for peering in var.peerings : peering.vlan_id >= 0 && peering.vlan_id <= 4095])
+    error_message = "The VLAN ID must be between 0 and 4095."
+  }
+  validation {
+    condition = alltrue([for peering in var.peerings :
+      can(regex("^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}/30$", peering.primary_peer_address_prefix)) &&
+      can(regex("^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}/30$", peering.secondary_peer_address_prefix))
+    ])
+    error_message = "The primary and secondary peer address prefix must be in the form of an IP address CIDR notation with a subnet size of 30 bit mask."
+  }
+  validation {
+    condition     = length([for peering in var.peerings : peering.peering_type]) <= 3
+    error_message = "The number of peerings can be up to 3."
+  }
+  validation {
+    condition     = length([for peering in var.peerings : peering.peering_type]) == length(distinct([for peering in var.peerings : peering.peering_type]))
+    error_message = "One peering of each type is allowed."
+  }
 }
 
 variable "role_assignments" {
@@ -208,6 +426,7 @@ variable "role_assignments" {
     condition                              = optional(string, null)
     condition_version                      = optional(string, null)
     delegated_managed_identity_resource_id = optional(string, null)
+    principal_type                         = optional(string, null)
   }))
   default     = {}
   description = <<DESCRIPTION
@@ -230,4 +449,55 @@ variable "tags" {
   type        = map(string)
   default     = null
   description = "(Optional) Tags of the resource."
+}
+
+variable "vnet_gw_connections" {
+  type = map(object({
+    name                                = optional(string, "")
+    resource_group_name                 = string
+    location                            = string
+    virtual_network_gateway_resource_id = string
+    authorization_key                   = optional(string, null)
+    routing_weight                      = optional(number, 0)
+    express_route_gateway_bypass        = optional(bool, false)
+    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746 
+    shared_key = optional(string, null)
+    tags       = optional(map(string), null)
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+    (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
+
+    - `name` - (Required) The name of the connection.
+    - `resource_group_name` - (Required) The name of the resource group in which to create the connection Changing this forces a new resource to be created.
+    - `location` - (Required) The location/region where the connection is located. 
+    - `virtual_network_gateway_resource_id` - (Required) The ID of the Virtual Network Gateway in which the connection will be created.
+    - `authorization_key` - (Optional) The authorization key associated with the Express Route Circuit.
+    - `routing_weight` - (Optional) The routing weight. Defaults to 0.
+    - `express_route_gateway_bypass` - (Optional) If true, data packets will bypass ExpressRoute Gateway for data forwarding.
+    - `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass must be set to true. Defaults to false.
+    - `tags` - (Optional) A mapping of tags to assign to the resource.
+
+    Example Input:
+
+```terraform
+  vnet_gw_connections = {
+    connection1gw = {
+      name                       = local.same_rg_conn_name
+      virtual_network_gateway_resource_id = local.same_rg_gw_resource_id
+      location                   = local.location
+      resource_group_name        = local.resource_group_name
+    }
+  }
+```
+  DESCRIPTION
+
+  validation {
+    condition     = alltrue([for connection in var.vnet_gw_connections : can(regex("^/subscriptions/[0-9a-fA-F-]+/resourceGroups/[a-zA-Z0-9._-]+/providers/Microsoft.Network/virtualNetworkGateways/[a-zA-Z0-9._-]+$", connection.virtual_network_gateway_resource_id))])
+    error_message = "virtual_network_gateway_resource_id must be in the form of an Azure resource ID."
+  }
+  validation {
+    condition     = alltrue([for connection in var.vnet_gw_connections : connection.routing_weight >= 0 && connection.routing_weight <= 32000])
+    error_message = "routing_weight must be between 0 and 32000."
+  }
 }

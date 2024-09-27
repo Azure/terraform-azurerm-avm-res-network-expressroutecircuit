@@ -1,7 +1,11 @@
 <!-- BEGIN_TF_DOCS -->
-# Default example
+# Azure ExpressRoute Circuit Module - Default Example
 
-This deploys the module in its simplest form.
+This example demonstrates how to deploy an Azure ExpressRoute Circuit using the module without deploying any additional dependencies such as peering or connections. This setup is ideal if you want to provision the circuit first and handle the dependent resources separately at a later stage.
+
+## This example will:
+ - Deploy an ExpressRoute Circuit in a specified region.
+ - Output the Service Key required by your service provider to activate the circuit.
 
 ```hcl
 terraform {
@@ -9,7 +13,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.74"
+      version = "3.99.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -20,8 +24,16 @@ terraform {
 
 provider "azurerm" {
   features {}
+  skip_provider_registration = true
 }
 
+locals {
+  bandwidth_in_mbps     = 50
+  family                = "MeteredData"
+  peering_location      = "Seattle"
+  service_provider_name = "Equinix"
+  tier                  = "Premium"
+}
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
@@ -50,16 +62,19 @@ resource "azurerm_resource_group" "this" {
 }
 
 # This is the module call
-# Do not specify location here due to the randomization above.
-# Leaving location as `null` will cause the module to use the resource group location
-# with a data source.
-module "test" {
-  source = "../../"
-  # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
-  # ...
-  location            = azurerm_resource_group.this.location
-  name                = "TODO" # TODO update with module.naming.<RESOURCE_TYPE>.name_unique
-  resource_group_name = azurerm_resource_group.this.name
+module "exr_circuit_test" {
+  source                = "../../"
+  resource_group_name   = azurerm_resource_group.this.name
+  name                  = module.naming.express_route_circuit.name_unique
+  service_provider_name = local.service_provider_name
+  peering_location      = local.peering_location
+  bandwidth_in_mbps     = local.bandwidth_in_mbps
+  location              = azurerm_resource_group.this.location
+
+  sku = {
+    tier   = local.tier
+    family = local.family
+  }
 
   enable_telemetry = var.enable_telemetry # see variables.tf
 }
@@ -72,7 +87,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.5)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.74)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (3.99.0)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
@@ -80,7 +95,7 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
-- [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/resource_group) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 
 <!-- markdownlint-disable MD013 -->
@@ -110,6 +125,12 @@ No outputs.
 
 The following Modules are called:
 
+### <a name="module_exr_circuit_test"></a> [exr\_circuit\_test](#module\_exr\_circuit\_test)
+
+Source: ../../
+
+Version:
+
 ### <a name="module_naming"></a> [naming](#module\_naming)
 
 Source: Azure/naming/azurerm
@@ -121,12 +142,6 @@ Version: ~> 0.3
 Source: Azure/regions/azurerm
 
 Version: ~> 0.3
-
-### <a name="module_test"></a> [test](#module\_test)
-
-Source: ../../
-
-Version:
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

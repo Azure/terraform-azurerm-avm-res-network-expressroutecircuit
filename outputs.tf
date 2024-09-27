@@ -1,13 +1,45 @@
-output "private_endpoints" {
-  description = <<DESCRIPTION
-  A map of the private endpoints created.
-  DESCRIPTION
-  value       = var.private_endpoints_manage_dns_zone_group ? azurerm_private_endpoint.this_managed_dns_zone_groups : azurerm_private_endpoint.this_unmanaged_dns_zone_groups
+output "authorisation_keys" {
+  description = "Authorisation keys for the ExpressRoute circuit."
+  sensitive   = true
+  value = {
+    for key, value in azurerm_express_route_circuit_authorization.this : key => value.authorization_key
+  }
 }
 
-# Module owners should include the full resource via a 'resource' output
-# https://azure.github.io/Azure-Verified-Modules/specs/terraform/#id-tffr2---category-outputs---additional-terraform-outputs
-output "resource" {
-  description = "This is the full output for the resource."
-  value       = azurerm_resource_group.TODO # TODO: Replace this dummy resource azurerm_resource_group.TODO with your module resource
+output "authorisation_used_status" {
+  description = "Authorisation used status."
+  value = {
+    for key, value in azurerm_express_route_circuit_authorization.this : key => value.authorization_use_status
+  }
+}
+
+output "express_route_gateway_connections" {
+  description = "ExpressRoute gateway connections."
+  value = {
+    for key, value in azurerm_express_route_connection.this : key => value
+  }
+}
+
+output "name" {
+  description = "The resource name of the ExpressRoute circuit."
+  value       = azurerm_express_route_circuit.this.name
+}
+
+output "peerings" {
+  description = "ExpressRoute Circuit peering configurations."
+  value = {
+    for key, value in azurerm_express_route_circuit_peering.this : key => value
+  }
+}
+
+output "resource_id" {
+  description = "The resource ID of the ExpressRoute circuit."
+  value       = azurerm_express_route_circuit.this.id
+}
+
+output "virtual_network_gateway_connections" {
+  description = "Virtual network gateway connections."
+  value = {
+    for key, value in azurerm_virtual_network_gateway_connection.this : key => value
+  }
 }
