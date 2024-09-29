@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.99.0"
+      version = "> 4.0.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -14,7 +14,7 @@ terraform {
 
 provider "azurerm" {
   features {}
-  skip_provider_registration = true
+  resource_provider_registrations = "none"
 }
 
 locals {
@@ -80,7 +80,6 @@ module "exr_circuit_test" {
       secondary_peer_address_prefix = "10.0.0.4/30"
       ipv4_enabled                  = true
       vlan_id                       = 300
-      shared_key                    = "A1B2C3D4E5F6"
 
       ipv6 = {
         primary_peer_address_prefix   = "2002:db01::/126"
@@ -127,7 +126,8 @@ module "exr_circuit_test" {
       virtual_network_gateway_resource_id = local.vng_gw_id
       location                            = local.location
       resource_group_name                 = local.resource_group_name
-      express_route_gateway_bypass        = true
+      express_route_gateway_bypass        = false
+      private_link_fast_path_enabled      = false
     }
   }
 
@@ -138,7 +138,8 @@ module "exr_circuit_test" {
       express_route_circuit_peering_resource_id = local.vng_gw_peering_id
       peering_map_key                           = "firstPeeringConfig"
       routeting_weight                          = 0
-      express_route_gateway_bypass_enabled      = true
+      express_route_gateway_bypass_enabled      = false
+      private_link_fast_path_enabled            = false
       routing = {
         inbound_route_map_resource_id  = azurerm_route_map.in.id
         outbound_route_map_resource_id = azurerm_route_map.out.id

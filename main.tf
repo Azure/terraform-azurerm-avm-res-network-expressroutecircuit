@@ -66,7 +66,7 @@ resource "azurerm_virtual_network_gateway_connection" "this" {
   express_route_circuit_id     = azurerm_express_route_circuit.this.id
   express_route_gateway_bypass = each.value.express_route_gateway_bypass
   routing_weight               = each.value.routing_weight
-  # private_link_fast_path_enabled = each.value.private_link_fast_path_enabled # disabled due to bug #26746
+  private_link_fast_path_enabled = each.value.private_link_fast_path_enabled # disabled due to bug #26746
   shared_key = each.value.shared_key
   tags       = each.value.tags
 
@@ -82,7 +82,7 @@ resource "azurerm_express_route_connection" "this" {
   express_route_gateway_id             = each.value.express_route_gateway_resource_id
   name                                 = coalesce(each.value.name, "con-${azurerm_express_route_circuit.this.name}-${regexall("[/\\w-\\.]+\\/([\\w-]+)", tostring(each.value.express_route_gateway_resource_id))[0][0]}")
   express_route_gateway_bypass_enabled = each.value.express_route_gateway_bypass_enabled
-  # private_link_fast_path_enabled     = each.value.private_link_fast_path_enabled # disabled due to bug #26746
+  private_link_fast_path_enabled       = each.value.private_link_fast_path_enabled # disabled due to bug #26746
   routing_weight = each.value.routing_weight
 
   dynamic "routing" {
