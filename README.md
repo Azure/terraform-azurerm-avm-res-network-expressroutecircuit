@@ -427,7 +427,7 @@ map(object({
     ipv4_enabled                  = optional(bool, true)
     shared_key                    = optional(string, null)
     peer_asn                      = optional(number, null)
-    route_filter_id               = optional(string, null)
+    route_filter_resource_id      = optional(string, null)
     microsoft_peering_config = optional(object({
       advertised_public_prefixes = list(string)
       customer_asn               = optional(number, null)
@@ -438,7 +438,7 @@ map(object({
       primary_peer_address_prefix   = string
       secondary_peer_address_prefix = string
       enabled                       = optional(bool, true)
-      route_filter_id               = optional(string, null)
+      route_filter_resource_id      = optional(string, null)
       microsoft_peering = optional(object({
         advertised_public_prefixes = optional(list(string))
         customer_asn               = optional(number, null)

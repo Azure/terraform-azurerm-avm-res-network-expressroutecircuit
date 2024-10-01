@@ -16,7 +16,7 @@ resource "azurerm_express_route_circuit_peering" "this" {
   ipv4_enabled                  = each.value.ipv4_enabled
   peer_asn                      = each.value.peer_asn
   primary_peer_address_prefix   = each.value.primary_peer_address_prefix
-  route_filter_id               = each.value.route_filter_id
+  route_filter_id               = each.value.route_filter_resource_id
   secondary_peer_address_prefix = each.value.secondary_peer_address_prefix
   shared_key                    = each.value.shared_key
 
@@ -27,7 +27,7 @@ resource "azurerm_express_route_circuit_peering" "this" {
       primary_peer_address_prefix   = each.value.ipv6.primary_peer_address_prefix
       secondary_peer_address_prefix = each.value.ipv6.secondary_peer_address_prefix
       enabled                       = each.value.ipv6.enabled
-      route_filter_id               = each.value.ipv6.route_filter_id
+      route_filter_id               = each.value.ipv6.route_filter_resource_id
 
       dynamic "microsoft_peering" {
         for_each = each.value.ipv6.microsoft_peering != null ? [each.value.ipv6.microsoft_peering] : []
