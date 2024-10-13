@@ -57,18 +57,18 @@ resource "azurerm_express_route_circuit_peering" "this" {
 resource "azurerm_virtual_network_gateway_connection" "this" {
   for_each = var.vnet_gw_connections
 
-  location                     = each.value.location
-  name                         = coalesce(each.value.name, "con-${azurerm_express_route_circuit.this.name}-${regexall("[/\\w-\\.]+\\/([\\w-]+)", tostring(each.value.virtual_network_gateway_resource_id))[0][0]}")
-  resource_group_name          = each.value.resource_group_name
-  type                         = "ExpressRoute"
-  virtual_network_gateway_id   = each.value.virtual_network_gateway_resource_id
-  authorization_key            = each.value.authorization_key
-  express_route_circuit_id     = azurerm_express_route_circuit.this.id
-  express_route_gateway_bypass = each.value.express_route_gateway_bypass
-  routing_weight               = each.value.routing_weight
-  private_link_fast_path_enabled = each.value.private_link_fast_path_enabled # disabled due to bug #26746
-  shared_key = each.value.shared_key
-  tags       = each.value.tags
+  location                       = each.value.location
+  name                           = coalesce(each.value.name, "con-${azurerm_express_route_circuit.this.name}-${regexall("[/\\w-\\.]+\\/([\\w-]+)", tostring(each.value.virtual_network_gateway_resource_id))[0][0]}")
+  resource_group_name            = each.value.resource_group_name
+  type                           = "ExpressRoute"
+  virtual_network_gateway_id     = each.value.virtual_network_gateway_resource_id
+  authorization_key              = each.value.authorization_key
+  express_route_circuit_id       = azurerm_express_route_circuit.this.id
+  express_route_gateway_bypass   = each.value.express_route_gateway_bypass
+  routing_weight                 = each.value.routing_weight
+  private_link_fast_path_enabled = each.value.private_link_fast_path_enabled
+  shared_key                     = each.value.shared_key
+  tags                           = each.value.tags
 
   # Depends on is necessary here because deployment of a connection before the peering has complete will cause the connection to be created in a failed state.
   depends_on = [azurerm_express_route_circuit_peering.this]
@@ -78,12 +78,14 @@ resource "azurerm_virtual_network_gateway_connection" "this" {
 resource "azurerm_express_route_connection" "this" {
   for_each = var.er_gw_connections
 
+  name                                 = coalesce(each.value.name, "con-${azurerm_express_route_circuit.this.name}-${regexall("[/\\w-\\.]+\\/([\\w-]+)", tostring(each.value.express_route_gateway_resource_id))[0][0]}")
   express_route_circuit_peering_id     = coalesce(each.value.express_route_circuit_peering_resource_id, try(azurerm_express_route_circuit_peering.this[each.value.peering_map_key].id, ""))
   express_route_gateway_id             = each.value.express_route_gateway_resource_id
-  name                                 = coalesce(each.value.name, "con-${azurerm_express_route_circuit.this.name}-${regexall("[/\\w-\\.]+\\/([\\w-]+)", tostring(each.value.express_route_gateway_resource_id))[0][0]}")
-  express_route_gateway_bypass_enabled = each.value.express_route_gateway_bypass_enabled
-  private_link_fast_path_enabled       = each.value.private_link_fast_path_enabled # disabled due to bug #26746
-  routing_weight = each.value.routing_weight
+  authorization_key                    = each.value.authorization_key
+  enable_internet_security             = each.value.enable_internet_security
+  # express_route_gateway_bypass_enabled = each.value.express_route_gateway_bypass_enabled -- Disabled due to bug in Azure provider #26746
+  # private_link_fast_path_enabled       = each.value.private_link_fast_path_enabled -- Disabled due to bug in Azure provider #26746
+  routing_weight                       = each.value.routing_weight
 
   dynamic "routing" {
     for_each = each.value.routing != null ? [each.value.routing] : []
@@ -104,7 +106,7 @@ resource "azurerm_express_route_connection" "this" {
     }
   }
 
-  # Aepends on is necessary here because creating multiple connections (vnet gateway and ER gateway) at the same time causese deployment failure.
+  # Depends on is necessary here because creating multiple connections (vnet gateway and ER gateway) at the same time causese deployment failure.
   depends_on = [azurerm_virtual_network_gateway_connection.this]
 }
 

@@ -176,9 +176,9 @@ variable "er_gw_connections" {
     express_route_gateway_resource_id         = string
     authorization_key                         = optional(string, null)
     enable_internet_security                  = optional(bool, false)
-    express_route_gateway_bypass_enabled      = optional(bool, false)
-    private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
-    routing_weight = optional(number, 0)
+    # express_route_gateway_bypass_enabled      = optional(bool, false) -- Disabled due to bug in Azure provider #26746
+    # private_link_fast_path_enabled            = optional(bool, false) -- Disabled due to bug in Azure provider #26746
+    routing_weight                            = optional(number, 0)
     routing = optional(object({
       associated_route_table_resource_id = optional(string)
       inbound_route_map_resource_id      = optional(string)
@@ -461,9 +461,9 @@ variable "vnet_gw_connections" {
     authorization_key                   = optional(string, null)
     routing_weight                      = optional(number, 0)
     express_route_gateway_bypass        = optional(bool, false)
-    private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746 
-    shared_key = optional(string, null)
-    tags       = optional(map(string), null)
+    private_link_fast_path_enabled      = optional(bool, false)
+    shared_key                          = optional(string, null)
+    tags                                = optional(map(string), null)
   }))
   default     = {}
   description = <<DESCRIPTION

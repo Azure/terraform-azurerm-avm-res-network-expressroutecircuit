@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "> 4.0.0"
+      version = ">= 4.4.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -15,6 +15,7 @@ terraform {
 provider "azurerm" {
   features {}
   resource_provider_registrations = "none"
+  subscription_id                 = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
 }
 
 locals {
@@ -29,7 +30,7 @@ locals {
   vng_gw_conn_name      = "vng-gw-conn"
   vng_gw_id             = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
   vng_gw_peering_id     = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
-  vwan_gw_id            = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/56baea672a39485b969fdd25f5832098-westus2-er-gw"
+  vwan_gw_id            = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/3f15552377fc4e1ca55ac58af5d7a67e-westus2-er-gw"
   vwan_hub_id           = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
 }
 
@@ -138,8 +139,8 @@ module "exr_circuit_test" {
       express_route_circuit_peering_resource_id = local.vng_gw_peering_id
       peering_map_key                           = "firstPeeringConfig"
       routeting_weight                          = 0
-      express_route_gateway_bypass_enabled      = false
-      private_link_fast_path_enabled            = false
+      # express_route_gateway_bypass_enabled      = false -- Disabled due to bug in Azure provider #26746
+      # private_link_fast_path_enabled            = false -- Disabled due to bug in Azure provider #26746
       routing = {
         inbound_route_map_resource_id  = azurerm_route_map.in.id
         outbound_route_map_resource_id = azurerm_route_map.out.id
