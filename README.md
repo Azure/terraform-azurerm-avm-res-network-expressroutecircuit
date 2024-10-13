@@ -280,6 +280,10 @@ map(object({
     enable_internet_security                  = optional(bool, false)
     # express_route_gateway_bypass_enabled      = optional(bool, false) -- Disabled due to bug in Azure provider #26746
     # private_link_fast_path_enabled            = optional(bool, false) -- Disabled due to bug in Azure provider #26746
+    routing_weight = optional(number, 0)
+    routing = optional(object({
+      associated_route_table_resource_id = optional(string)
+      inbound_route_map_resource_id      = optional(string)
       outbound_route_map_resource_id     = optional(string)
       propagated_route_table = object({
         labels                   = optional(list(string), null)
