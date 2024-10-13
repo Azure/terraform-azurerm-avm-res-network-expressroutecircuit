@@ -48,7 +48,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.5)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (> 3.71, <= 3.99.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 4.4.0)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
@@ -278,8 +278,8 @@ map(object({
     express_route_gateway_resource_id         = string
     authorization_key                         = optional(string, null)
     enable_internet_security                  = optional(bool, false)
-    express_route_gateway_bypass_enabled      = optional(bool, false)
-    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
+    # express_route_gateway_bypass_enabled      = optional(bool, false) -- Disabled due to bug in Azure provider #26746
+    # private_link_fast_path_enabled            = optional(bool, false) -- Disabled due to bug in Azure provider #26746
     routing_weight = optional(number, 0)
     routing = optional(object({
       associated_route_table_resource_id = optional(string)
@@ -527,9 +527,9 @@ map(object({
     authorization_key                   = optional(string, null)
     routing_weight                      = optional(number, 0)
     express_route_gateway_bypass        = optional(bool, false)
-    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
-    shared_key = optional(string, null)
-    tags       = optional(map(string), null)
+    private_link_fast_path_enabled      = optional(bool, false)
+    shared_key                          = optional(string, null)
+    tags                                = optional(map(string), null)
   }))
 ```
 
