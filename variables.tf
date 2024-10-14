@@ -176,7 +176,7 @@ variable "er_gw_connections" {
     authorization_key                         = optional(string, null)
     enable_internet_security                  = optional(bool, false)
     express_route_gateway_bypass_enabled      = optional(bool, false)
-    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
+    # private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
     routing_weight = optional(number, 0)
     routing = optional(object({
       associated_route_table_resource_id = optional(string)
@@ -189,6 +189,7 @@ variable "er_gw_connections" {
     }), null)
   }))
   default     = {}
+  nullable    = false
   description = <<DESCRIPTION
 (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
 
@@ -249,6 +250,7 @@ variable "express_route_circuit_authorizations" {
     name = string
   }))
   default     = {}
+  nullable    = false
   description = <<DESCRIPTION
 (Optional) A map of authorization objects to create authorizations for the ExpressRoute Circuits. 
 
@@ -313,7 +315,7 @@ variable "peerings" {
     ipv4_enabled                  = optional(bool, true)
     shared_key                    = optional(string, null)
     peer_asn                      = optional(number, null)
-    route_filter_id               = optional(string, null)
+    route_filter_resource_id      = optional(string, null)
     microsoft_peering_config = optional(object({
       advertised_public_prefixes = list(string)
       customer_asn               = optional(number, null)
@@ -324,7 +326,7 @@ variable "peerings" {
       primary_peer_address_prefix   = string
       secondary_peer_address_prefix = string
       enabled                       = optional(bool, true)
-      route_filter_id               = optional(string, null)
+      route_filter_resource_id      = optional(string, null)
       microsoft_peering = optional(object({
         advertised_public_prefixes = optional(list(string))
         customer_asn               = optional(number, null)
@@ -334,6 +336,7 @@ variable "peerings" {
     }), null)
   }))
   default     = {}
+  nullable    = false
   description = <<DESCRIPTION
 (Optional) A map of association objects to create peerings between the created circuit and the designated gateways. 
 
@@ -346,7 +349,20 @@ variable "peerings" {
 - `peer_asn` - (Optional) The peer ASN.
 - `route_filter_id` - (Optional) The ID of the route filter to associate with the peering.
 - `microsoft_peering_config` - (Optional) A map of Microsoft peering configuration settings.
+  - `advertised_public_prefixes` - (Required) A list of public prefixes to advertise.
+  - `customer_asn` - (Optional) The customer ASN.
+  - `routing_registry_name` - (Optional) The routing registry name. Defaults to `NONE`.
+  - `advertised_communities` - (Optional) A list of advertised communities.
 - `ipv6` - (Optional) A map of IPv6 peering configuration settings.
+  - `primary_peer_address_prefix` - (Required) The primary peer address prefix.
+  - `secondary_peer_address_prefix` - (Required) The secondary peer address prefix.
+  - `enabled` - (Optional) Is IPv6 enabled for this peering. Defaults to `true`.
+  - `route_filter_id` - (Optional) The ID of the route filter to associate with the peering.
+  - `microsoft_peering` - (Optional) A map of Microsoft peering configuration settings.
+    - `advertised_public_prefixes` - (Optional) A list of public prefixes to advertise.
+    - `customer_asn` - (Optional) The customer ASN.
+    - `routing_registry_name` - (Optional) The routing registry name. Defaults to `NONE`.
+    - `advertised_communities` - (Optional) A list of advertised communities.
 
 Example Input:
 
@@ -460,15 +476,16 @@ variable "vnet_gw_connections" {
     authorization_key                   = optional(string, null)
     routing_weight                      = optional(number, 0)
     express_route_gateway_bypass        = optional(bool, false)
-    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746 
+    # private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746 
     shared_key = optional(string, null)
     tags       = optional(map(string), null)
   }))
   default     = {}
+  nullable    = false
   description = <<DESCRIPTION
 (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
 
-- `name` - (Required) The name of the connection.
+- `name` - (Optional) The name of the connection.
 - `resource_group_name` - (Required) The name of the resource group in which to create the connection Changing this forces a new resource to be created.
 - `location` - (Required) The location/region where the connection is located. 
 - `virtual_network_gateway_resource_id` - (Required) The ID of the Virtual Network Gateway in which the connection will be created.
