@@ -189,7 +189,6 @@ variable "er_gw_connections" {
     }), null)
   }))
   default     = {}
-  nullable    = false
   description = <<DESCRIPTION
 (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
 
@@ -234,6 +233,7 @@ er_gw_connections = {
 }
 ```
 DESCRIPTION
+  nullable    = false
 
   validation {
     condition     = alltrue([for connection in var.er_gw_connections : connection.express_route_circuit_peering_resource_id != null || connection.peering_map_key != null])
@@ -250,7 +250,6 @@ variable "express_route_circuit_authorizations" {
     name = string
   }))
   default     = {}
-  nullable    = false
   description = <<DESCRIPTION
 (Optional) A map of authorization objects to create authorizations for the ExpressRoute Circuits. 
 
@@ -269,6 +268,7 @@ express_route_circuit_authorizations = {
 }
 ```
 DESCRIPTION
+  nullable    = false
 }
 
 variable "express_route_port_resource_id" {
@@ -336,7 +336,6 @@ variable "peerings" {
     }), null)
   }))
   default     = {}
-  nullable    = false
   description = <<DESCRIPTION
 (Optional) A map of association objects to create peerings between the created circuit and the designated gateways. 
 
@@ -407,6 +406,7 @@ peerings = {
 }
 ```
 DESCRIPTION
+  nullable    = false
 
   validation {
     condition     = alltrue([for peering in var.peerings : contains(["AzurePrivatePeering", "AzurePublicPeering", "MicrosoftPeering"], peering.peering_type)])
@@ -481,7 +481,6 @@ variable "vnet_gw_connections" {
     tags       = optional(map(string), null)
   }))
   default     = {}
-  nullable    = false
   description = <<DESCRIPTION
 (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
 
@@ -508,6 +507,7 @@ vnet_gw_connections = {
 }
 ```
 DESCRIPTION
+  nullable    = false
 
   validation {
     condition     = alltrue([for connection in var.vnet_gw_connections : can(regex("^/subscriptions/[0-9a-fA-F-]+/resourceGroups/[a-zA-Z0-9._-]+/providers/Microsoft.Network/virtualNetworkGateways/[a-zA-Z0-9._-]+$", connection.virtual_network_gateway_resource_id))])

@@ -28,7 +28,8 @@ terraform {
 
 provider "azurerm" {
   features {}
-  skip_provider_registration = true
+  skip_provider_registration             = true
+  prevent_deletion_if_contains_resources = false
 }
 
 locals {
