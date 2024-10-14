@@ -1,13 +1,13 @@
-output "authorisation_keys" {
-  description = "Authorisation keys for the ExpressRoute circuit."
+output "authorization_keys" {
+  description = "Authorization keys for the ExpressRoute circuit."
   sensitive   = true
   value = {
     for key, value in azurerm_express_route_circuit_authorization.this : key => value.authorization_key
   }
 }
 
-output "authorisation_used_status" {
-  description = "Authorisation used status."
+output "authorization_used_status" {
+  description = "Authorization used status."
   value = {
     for key, value in azurerm_express_route_circuit_authorization.this : key => value.authorization_use_status
   }
