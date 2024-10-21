@@ -346,7 +346,7 @@ variable "peerings" {
 - `ipv4_enabled` - (Optional) Is IPv4 enabled for this peering. Defaults to `true`.
 - `shared_key` - (Optional) The shared key for the peering.
 - `peer_asn` - (Optional) The peer ASN.
-- `route_filter_id` - (Optional) The ID of the route filter to associate with the peering.
+- `route_filter_resource_id` - (Optional) The ID of the route filter to associate with the peering.
 - `microsoft_peering_config` - (Optional) A map of Microsoft peering configuration settings.
   - `advertised_public_prefixes` - (Required) A list of public prefixes to advertise.
   - `customer_asn` - (Optional) The customer ASN.
@@ -356,7 +356,7 @@ variable "peerings" {
   - `primary_peer_address_prefix` - (Required) The primary peer address prefix.
   - `secondary_peer_address_prefix` - (Required) The secondary peer address prefix.
   - `enabled` - (Optional) Is IPv6 enabled for this peering. Defaults to `true`.
-  - `route_filter_id` - (Optional) The ID of the route filter to associate with the peering.
+  - `route_filter_resource_id` - (Optional) The ID of the route filter to associate with the peering.
   - `microsoft_peering` - (Optional) A map of Microsoft peering configuration settings.
     - `advertised_public_prefixes` - (Optional) A list of public prefixes to advertise.
     - `customer_asn` - (Optional) The customer ASN.
