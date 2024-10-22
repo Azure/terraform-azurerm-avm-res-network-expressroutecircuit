@@ -1,7 +1,7 @@
 variable "location" {
   type        = string
   description = <<DESCRIPTION
-  (Required) The location of the ExpressRoute Circuit. Changing this forces a new resource to be created.
+(Required) The location of the ExpressRoute Circuit. Changing this forces a new resource to be created.
 DESCRIPTION
   nullable    = false
 }
@@ -9,14 +9,14 @@ DESCRIPTION
 variable "name" {
   type        = string
   description = <<DESCRIPTION
-  (Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
+(Required) The name of the ExpressRoute Circuit. Changing this forces a new resource to be created.
 DESCRIPTION
 }
 
 variable "peering_location" {
   type        = string
   description = <<DESCRIPTION
-  (Required) The peering location.
+(Required) The peering location.
 DESCRIPTION
   nullable    = false
 }
@@ -32,7 +32,7 @@ DESCRIPTION
 variable "service_provider_name" {
   type        = string
   description = <<DESCRIPTION
-  (Required) The name of the service provider.
+(Required) The name of the service provider.
 DESCRIPTION
   nullable    = false
 }
@@ -43,7 +43,7 @@ variable "sku" {
     family = string
   })
   description = <<DESCRIPTION
-  (Required) The SKU of the ExpressRoute Circuit.
+(Required) The SKU of the ExpressRoute Circuit.
 DESCRIPTION
   nullable    = false
 
@@ -61,7 +61,7 @@ variable "allow_classic_operations" {
   type        = bool
   default     = false
   description = <<DESCRIPTION
-  (Optional) Allow classic operations.
+(Optional) Allow classic operations.
 DESCRIPTION
 }
 
@@ -69,7 +69,7 @@ variable "authorization_key" {
   type        = string
   default     = null
   description = <<DESCRIPTION
-  (Optional) The authorization key of the ExpressRoute Circuit.
+(Optional) The authorization key of the ExpressRoute Circuit.
 DESCRIPTION
 }
 
@@ -77,7 +77,7 @@ variable "bandwidth_in_gbps" {
   type        = number
   default     = null
   description = <<DESCRIPTION
-  (Optional) The bandwidth in Gbps.
+(Optional) The bandwidth in Gbps.
 DESCRIPTION
 }
 
@@ -85,7 +85,7 @@ variable "bandwidth_in_mbps" {
   type        = number
   default     = null
   description = <<DESCRIPTION
-  (Optional) The bandwidth in Mbps.
+(Optional) The bandwidth in Mbps.
 DESCRIPTION
 }
 
@@ -176,7 +176,7 @@ variable "er_gw_connections" {
     authorization_key                         = optional(string, null)
     enable_internet_security                  = optional(bool, false)
     express_route_gateway_bypass_enabled      = optional(bool, false)
-    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
+    # private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
     routing_weight = optional(number, 0)
     routing = optional(object({
       associated_route_table_resource_id = optional(string)
@@ -190,49 +190,50 @@ variable "er_gw_connections" {
   }))
   default     = {}
   description = <<DESCRIPTION
-    (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
+(Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
 
-    - `name` - (Required) The name of the connection.
-    - `express_route_circuit_peering_resource_id` - (Optional) The id of the peering to associate to. Note: Either `express_route_circuit_peering_resource_id` or `peering_map_key` must be set.
-    - `peering_map_key` - (Optional) The key of the peering variable to associate to. Note: Either `peering_map_key` or `express_route_circuit_peering_resource_id` or must be set.
-    - `express_route_gateway_resource_id` - (Required) Resource ID of the Express Route Gateway.
-    - `authorization_key` - (Optional) The authorization key to establish the Express Route Connection.
-    - `enable_internet_security` - (Optional) Set Internet security for this Express Route Connection.
-    - `express_route_gateway_bypass_enabled` - (Optional) Specified whether Fast Path is enabled for Virtual Wan Firewall Hub. Defaults to false.
-    - `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass_enabled must be set to true. Defaults to false.
-    - `routing_weight` - (Optional) The routing weight associated to the Express Route Connection. Possible value is between 0 and 32000. Defaults to 0.
-    - `routing` - (Optional) A routing block.
-      - `associated_route_table_resource_id` - (Optional) The ID of the Virtual Hub Route Table associated with this Express Route Connection.
-      - `inbound_route_map_resource_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for inbound routes.
-      - `outbound_route_map_resource_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for outbound routes.
-      - `propagated_route_table` - (Optional) A propagated_route_table block.
-        - `labels` - (Optional) The list of labels to logically group route tables.
-        - `route_table_resource_ids` - (Optional) A list of IDs of the Virtual Hub Route Table to propagate routes from Express Route Connection to the route table.
+- `name` - (Required) The name of the connection.
+- `express_route_circuit_peering_resource_id` - (Optional) The id of the peering to associate to. Note: Either `express_route_circuit_peering_resource_id` or `peering_map_key` must be set.
+- `peering_map_key` - (Optional) The key of the peering variable to associate to. Note: Either `peering_map_key` or `express_route_circuit_peering_resource_id` or must be set.
+- `express_route_gateway_resource_id` - (Required) Resource ID of the Express Route Gateway.
+- `authorization_key` - (Optional) The authorization key to establish the Express Route Connection.
+- `enable_internet_security` - (Optional) Set Internet security for this Express Route Connection.
+- `express_route_gateway_bypass_enabled` - (Optional) Specified whether Fast Path is enabled for Virtual Wan Firewall Hub. Defaults to false.
+- `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass_enabled must be set to true. Defaults to false.
+- `routing_weight` - (Optional) The routing weight associated to the Express Route Connection. Possible value is between 0 and 32000. Defaults to 0.
+- `routing` - (Optional) A routing block.
+  - `associated_route_table_resource_id` - (Optional) The ID of the Virtual Hub Route Table associated with this Express Route Connection.
+  - `inbound_route_map_resource_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for inbound routes.
+  - `outbound_route_map_resource_id` - (Optional) The ID of the Route Map associated with this Express Route Connection for outbound routes.
+  - `propagated_route_table` - (Optional) A propagated_route_table block.
+    - `labels` - (Optional) The list of labels to logically group route tables.
+    - `route_table_resource_ids` - (Optional) A list of IDs of the Virtual Hub Route Table to propagate routes from Express Route Connection to the route table.
 
-    Example Input:
+Example Input:
 
 ```terraform
-    er_gw_connections = {
-    connection1er = {
-      name                             = "ExRConnection-westus2-er"
-      express_route_gateway_resource_id         = local.same_rg_er_gw_resource_id
-      express_route_circuit_peering_resource_id = local.same_rg_er_peering_resource_id
-      peering_map_key = "firstPeeringConfig"
-      routeting_weight = 0
-      routing = {
-        inbound_route_map_resource_id         = azurerm_route_map.in.id
-        outbound_route_map_resource_id        = azurerm_route_map.out.id
-        propagated_route_table = {
-          route_table_resource_ids = [
-            azurerm_virtual_hub_route_table.example.id,
-            azurerm_virtual_hub_route_table.additional.id
-          ]
-        }
+er_gw_connections = {
+  connection1er = {
+    name                             = "ExRConnection-westus2-er"
+    express_route_gateway_resource_id         = local.same_rg_er_gw_resource_id
+    express_route_circuit_peering_resource_id = local.same_rg_er_peering_resource_id
+    peering_map_key = "firstPeeringConfig"
+    routeting_weight = 0
+    routing = {
+      inbound_route_map_resource_id         = azurerm_route_map.in.id
+      outbound_route_map_resource_id        = azurerm_route_map.out.id
+      propagated_route_table = {
+        route_table_resource_ids = [
+          azurerm_virtual_hub_route_table.example.id,
+          azurerm_virtual_hub_route_table.additional.id
+        ]
       }
     }
   }
+}
 ```
-  DESCRIPTION
+DESCRIPTION
+  nullable    = false
 
   validation {
     condition     = alltrue([for connection in var.er_gw_connections : connection.express_route_circuit_peering_resource_id != null || connection.peering_map_key != null])
@@ -250,23 +251,24 @@ variable "express_route_circuit_authorizations" {
   }))
   default     = {}
   description = <<DESCRIPTION
-    (Optional) A map of authorization objects to create authorizations for the ExpressRoute Circuits. 
+(Optional) A map of authorization objects to create authorizations for the ExpressRoute Circuits. 
 
-    - `name` - (Required) The name of the authorization.
+- `name` - (Required) The name of the authorization.
 
-    Example Input:
+Example Input:
 
 ```terraform
-    express_route_circuit_authorizations = {
-      authorization1 = {
-        name              = "authorization1"
-      },
-      authorization2 = {
-        name              = "azurerm_express_route_gateway.some_gateway.name-authorization" 
-      }
-    }
+express_route_circuit_authorizations = {
+  authorization1 = {
+    name              = "authorization1"
+  },
+  authorization2 = {
+    name              = "azurerm_express_route_gateway.some_gateway.name-authorization" 
+  }
+}
 ```
-  DESCRIPTION
+DESCRIPTION
+  nullable    = false
 }
 
 variable "express_route_port_resource_id" {
@@ -281,7 +283,7 @@ variable "exr_circuit_tags" {
   type        = map(string)
   default     = null
   description = <<DESCRIPTION
-  (Optional) A mapping of tags to assign to the ExpressRoute Circuit.
+(Optional) A mapping of tags to assign to the ExpressRoute Circuit.
 DESCRIPTION
 }
 
@@ -313,7 +315,7 @@ variable "peerings" {
     ipv4_enabled                  = optional(bool, true)
     shared_key                    = optional(string, null)
     peer_asn                      = optional(number, null)
-    route_filter_id               = optional(string, null)
+    route_filter_resource_id      = optional(string, null)
     microsoft_peering_config = optional(object({
       advertised_public_prefixes = list(string)
       customer_asn               = optional(number, null)
@@ -324,7 +326,7 @@ variable "peerings" {
       primary_peer_address_prefix   = string
       secondary_peer_address_prefix = string
       enabled                       = optional(bool, true)
-      route_filter_id               = optional(string, null)
+      route_filter_resource_id      = optional(string, null)
       microsoft_peering = optional(object({
         advertised_public_prefixes = optional(list(string))
         customer_asn               = optional(number, null)
@@ -335,62 +337,76 @@ variable "peerings" {
   }))
   default     = {}
   description = <<DESCRIPTION
-    (Optional) A map of association objects to create peerings between the created circuit and the designated gateways. 
+(Optional) A map of association objects to create peerings between the created circuit and the designated gateways. 
 
-    - `peering_type` - (Required) The type of peering. Possible values are `AzurePrivatePeering`, `AzurePublicPeering`, and `MicrosoftPeering`.
-    - `vlan_id` - (Required) The VLAN ID for the peering.
-    - `primary_peer_address_prefix` - (Optional) The primary peer address prefix.
-    - `secondary_peer_address_prefix` - (Optional) The secondary peer address prefix.
-    - `ipv4_enabled` - (Optional) Is IPv4 enabled for this peering. Defaults to `true`.
-    - `shared_key` - (Optional) The shared key for the peering.
-    - `peer_asn` - (Optional) The peer ASN.
-    - `route_filter_id` - (Optional) The ID of the route filter to associate with the peering.
-    - `microsoft_peering_config` - (Optional) A map of Microsoft peering configuration settings.
-    - `ipv6` - (Optional) A map of IPv6 peering configuration settings.
+- `peering_type` - (Required) The type of peering. Possible values are `AzurePrivatePeering`, `AzurePublicPeering`, and `MicrosoftPeering`.
+- `vlan_id` - (Required) The VLAN ID for the peering.
+- `primary_peer_address_prefix` - (Optional) The primary peer address prefix.
+- `secondary_peer_address_prefix` - (Optional) The secondary peer address prefix.
+- `ipv4_enabled` - (Optional) Is IPv4 enabled for this peering. Defaults to `true`.
+- `shared_key` - (Optional) The shared key for the peering.
+- `peer_asn` - (Optional) The peer ASN.
+- `route_filter_resource_id` - (Optional) The ID of the route filter to associate with the peering.
+- `microsoft_peering_config` - (Optional) A map of Microsoft peering configuration settings.
+  - `advertised_public_prefixes` - (Required) A list of public prefixes to advertise.
+  - `customer_asn` - (Optional) The customer ASN.
+  - `routing_registry_name` - (Optional) The routing registry name. Defaults to `NONE`.
+  - `advertised_communities` - (Optional) A list of advertised communities.
+- `ipv6` - (Optional) A map of IPv6 peering configuration settings.
+  - `primary_peer_address_prefix` - (Required) The primary peer address prefix.
+  - `secondary_peer_address_prefix` - (Required) The secondary peer address prefix.
+  - `enabled` - (Optional) Is IPv6 enabled for this peering. Defaults to `true`.
+  - `route_filter_resource_id` - (Optional) The ID of the route filter to associate with the peering.
+  - `microsoft_peering` - (Optional) A map of Microsoft peering configuration settings.
+    - `advertised_public_prefixes` - (Optional) A list of public prefixes to advertise.
+    - `customer_asn` - (Optional) The customer ASN.
+    - `routing_registry_name` - (Optional) The routing registry name. Defaults to `NONE`.
+    - `advertised_communities` - (Optional) A list of advertised communities.
 
-    Example Input:
+Example Input:
 
 ```terraform
-    peerings = {
-      PrivatePeering = {
-        peering_type                  = "AzurePrivatePeering"
-        peer_asn                      = 100
-        primary_peer_address_prefix   = "10.0.0.0/30"
-        secondary_peer_address_prefix = "10.0.0.4/30"
-        ipv4_enabled                  = true
-        vlan_id                       = 300
+peerings = {
+  PrivatePeering = {
+    peering_type                  = "AzurePrivatePeering"
+    peer_asn                      = 100
+    primary_peer_address_prefix   = "10.0.0.0/30"
+    secondary_peer_address_prefix = "10.0.0.4/30"
+    ipv4_enabled                  = true
+    vlan_id                       = 300
 
-        ipv6 {
-          primary_peer_address_prefix   = "2002:db01::/126"
-          secondary_peer_address_prefix = "2003:db01::/126"
-          enabled                       = true
-        }
-      },
-      MicrosoftPeering = {
-        peering_type                  = "MicrosoftPeering"
-        peer_asn                      = 200
-        primary_peer_address_prefix   = "123.0.0.0/30"
-        secondary_peer_address_prefix = "123.0.0.4/30"
-        ipv4_enabled                  = true
-        vlan_id                       = 400
+    ipv6 {
+      primary_peer_address_prefix   = "2002:db01::/126"
+      secondary_peer_address_prefix = "2003:db01::/126"
+      enabled                       = true
+    }
+  },
+  MicrosoftPeering = {
+    peering_type                  = "MicrosoftPeering"
+    peer_asn                      = 200
+    primary_peer_address_prefix   = "123.0.0.0/30"
+    secondary_peer_address_prefix = "123.0.0.4/30"
+    ipv4_enabled                  = true
+    vlan_id                       = 400
 
-        microsoft_peering_config {
-          advertised_public_prefixes = ["123.1.0.0/24"]
-        }
+    microsoft_peering_config {
+      advertised_public_prefixes = ["123.1.0.0/24"]
+    }
 
-        ipv6 {
-          primary_peer_address_prefix   = "2002:db01::/126"
-          secondary_peer_address_prefix = "2003:db01::/126"
-          enabled                       = true
+    ipv6 {
+      primary_peer_address_prefix   = "2002:db01::/126"
+      secondary_peer_address_prefix = "2003:db01::/126"
+      enabled                       = true
 
-          microsoft_peering {
-            advertised_public_prefixes = ["2002:db01::/126"]
-          }
-        }
+      microsoft_peering {
+        advertised_public_prefixes = ["2002:db01::/126"]
       }
     }
+  }
+}
 ```
-  DESCRIPTION
+DESCRIPTION
+  nullable    = false
 
   validation {
     condition     = alltrue([for peering in var.peerings : contains(["AzurePrivatePeering", "AzurePublicPeering", "MicrosoftPeering"], peering.peering_type)])
@@ -460,37 +476,38 @@ variable "vnet_gw_connections" {
     authorization_key                   = optional(string, null)
     routing_weight                      = optional(number, 0)
     express_route_gateway_bypass        = optional(bool, false)
-    #private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746 
+    # private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746 
     shared_key = optional(string, null)
     tags       = optional(map(string), null)
   }))
   default     = {}
   description = <<DESCRIPTION
-    (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
+(Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
 
-    - `name` - (Required) The name of the connection.
-    - `resource_group_name` - (Required) The name of the resource group in which to create the connection Changing this forces a new resource to be created.
-    - `location` - (Required) The location/region where the connection is located. 
-    - `virtual_network_gateway_resource_id` - (Required) The ID of the Virtual Network Gateway in which the connection will be created.
-    - `authorization_key` - (Optional) The authorization key associated with the Express Route Circuit.
-    - `routing_weight` - (Optional) The routing weight. Defaults to 0.
-    - `express_route_gateway_bypass` - (Optional) If true, data packets will bypass ExpressRoute Gateway for data forwarding.
-    - `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass must be set to true. Defaults to false.
-    - `tags` - (Optional) A mapping of tags to assign to the resource.
+- `name` - (Optional) The name of the connection.
+- `resource_group_name` - (Required) The name of the resource group in which to create the connection Changing this forces a new resource to be created.
+- `location` - (Required) The location/region where the connection is located. 
+- `virtual_network_gateway_resource_id` - (Required) The ID of the Virtual Network Gateway in which the connection will be created.
+- `authorization_key` - (Optional) The authorization key associated with the Express Route Circuit.
+- `routing_weight` - (Optional) The routing weight. Defaults to 0.
+- `express_route_gateway_bypass` - (Optional) If true, data packets will bypass ExpressRoute Gateway for data forwarding.
+- `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass must be set to true. Defaults to false.
+- `tags` - (Optional) A mapping of tags to assign to the resource.
 
-    Example Input:
+Example Input:
 
 ```terraform
-  vnet_gw_connections = {
-    connection1gw = {
-      name                       = local.same_rg_conn_name
-      virtual_network_gateway_resource_id = local.same_rg_gw_resource_id
-      location                   = local.location
-      resource_group_name        = local.resource_group_name
-    }
+vnet_gw_connections = {
+  connection1gw = {
+    name                       = local.same_rg_conn_name
+    virtual_network_gateway_resource_id = local.same_rg_gw_resource_id
+    location                   = local.location
+    resource_group_name        = local.resource_group_name
   }
+}
 ```
-  DESCRIPTION
+DESCRIPTION
+  nullable    = false
 
   validation {
     condition     = alltrue([for connection in var.vnet_gw_connections : can(regex("^/subscriptions/[0-9a-fA-F-]+/resourceGroups/[a-zA-Z0-9._-]+/providers/Microsoft.Network/virtualNetworkGateways/[a-zA-Z0-9._-]+$", connection.virtual_network_gateway_resource_id))])
