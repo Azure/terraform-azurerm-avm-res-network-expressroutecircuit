@@ -22,15 +22,13 @@ This module helps you deploy an Azure ExpressRoute Circuit and its related depen
    
 2. **Work with Your Service Provider**: Share the Service Key with your service provider to activate the circuit.
 
-3. **Deploy Peering and Dependencies**: Once the circuit status is **Provisioned**, deploy the peering and any related services.
+3. **Deploy Peering and Dependencies**: Once the circuit status is **Provisioned**, deploy the peering, connections and any related services.
 
 > **Note**: If you attempt to deploy peering before the circuit is in the **Provisioned** state, the module deployment will fail. In Terraform, it’s recommended **not** to pass parameters for dependent resources (such as Peerings or Connections) until after the circuit is provisioned. This ensures a successful Terraform deployment and a stable state file.
 
-## Known Limitations
+## Important Notes
 
-- **Peering Limit**: The number of peerings is limited to three for existing customers using public peering. New customers should only deploy private or Microsoft peerings as per their requirements. Refer to the [retirement notice for Public Peering](https://azure.microsoft.com/en-us/updates/retirement-notice-migrate-from-public-peering-by-march-31-2024/).
-
-- **Private Link Fast Path**: Private link fast path is currently disabled due to a [known issue](https://github.com/hashicorp/terraform-provider-azurerm/issues/26746).
+- **Peering Limit**: The number of peerings is limited to three for existing customers using public peering. New ER deployments should only deploy private or Microsoft peerings. Refer to the [retirement notice for Public Peering](https://azure.microsoft.com/en-us/updates/retirement-notice-migrate-from-public-peering-by-march-31-2024/).
 
 - **Gateway Connection Clarification**: When deploying a connection, ensure that you distinguish between a **Virtual Network Gateway** and an **ExpressRoute Gateway**. The former is deployed in Virtual Networks, while the latter is used in Virtual WANs. In Terraform, they are represented as two different resource types, and we've separated them by variable definition for ease of deployment.
    
