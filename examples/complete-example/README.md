@@ -17,7 +17,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.99.0"
+      version = "3.116.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -47,7 +47,7 @@ locals {
   vng_gw_conn_name      = "vng-gw-conn"
   vng_gw_id             = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
   vng_gw_peering_id     = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
-  vwan_gw_id            = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/56baea672a39485b969fdd25f5832098-westus2-er-gw"
+  vwan_gw_id            = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/3f15552377fc4e1ca55ac58af5d7a67e-westus2-er-gw"
   vwan_hub_id           = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
 }
 
@@ -146,6 +146,7 @@ module "exr_circuit_test" {
       location                            = local.location
       resource_group_name                 = local.resource_group_name
       express_route_gateway_bypass        = true
+      private_link_fast_path_enabled      = true
     }
   }
 
@@ -239,7 +240,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.5)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (3.99.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (3.116.0)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
@@ -247,10 +248,10 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
-- [azurerm_route_map.in](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/route_map) (resource)
-- [azurerm_route_map.out](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/route_map) (resource)
-- [azurerm_virtual_hub_route_table.additional](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/virtual_hub_route_table) (resource)
-- [azurerm_virtual_hub_route_table.example](https://registry.terraform.io/providers/hashicorp/azurerm/3.99.0/docs/resources/virtual_hub_route_table) (resource)
+- [azurerm_route_map.in](https://registry.terraform.io/providers/hashicorp/azurerm/3.116.0/docs/resources/route_map) (resource)
+- [azurerm_route_map.out](https://registry.terraform.io/providers/hashicorp/azurerm/3.116.0/docs/resources/route_map) (resource)
+- [azurerm_virtual_hub_route_table.additional](https://registry.terraform.io/providers/hashicorp/azurerm/3.116.0/docs/resources/virtual_hub_route_table) (resource)
+- [azurerm_virtual_hub_route_table.example](https://registry.terraform.io/providers/hashicorp/azurerm/3.116.0/docs/resources/virtual_hub_route_table) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 
 <!-- markdownlint-disable MD013 -->

@@ -476,9 +476,9 @@ variable "vnet_gw_connections" {
     authorization_key                   = optional(string, null)
     routing_weight                      = optional(number, 0)
     express_route_gateway_bypass        = optional(bool, false)
-    # private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746 
-    shared_key = optional(string, null)
-    tags       = optional(map(string), null)
+    private_link_fast_path_enabled      = optional(bool, false)
+    shared_key                          = optional(string, null)
+    tags                                = optional(map(string), null)
   }))
   default     = {}
   description = <<DESCRIPTION
@@ -491,7 +491,7 @@ variable "vnet_gw_connections" {
 - `authorization_key` - (Optional) The authorization key associated with the Express Route Circuit.
 - `routing_weight` - (Optional) The routing weight. Defaults to 0.
 - `express_route_gateway_bypass` - (Optional) If true, data packets will bypass ExpressRoute Gateway for data forwarding.
-- `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass must be set to true. Defaults to false.
+- `private_link_fast_path_enabled` - (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express_route_gateway_bypass must be set to true. Defaults to false.
 - `tags` - (Optional) A mapping of tags to assign to the resource.
 
 Example Input:

@@ -22,15 +22,13 @@ This module helps you deploy an Azure ExpressRoute Circuit and its related depen
    
 2. **Work with Your Service Provider**: Share the Service Key with your service provider to activate the circuit.
 
-3. **Deploy Peering and Dependencies**: Once the circuit status is **Provisioned**, deploy the peering and any related services.
+3. **Deploy Peering and Dependencies**: Once the circuit status is **Provisioned**, deploy the peering, connections and any related services.
 
 > **Note**: If you attempt to deploy peering before the circuit is in the **Provisioned** state, the module deployment will fail. In Terraform, it’s recommended **not** to pass parameters for dependent resources (such as Peerings or Connections) until after the circuit is provisioned. This ensures a successful Terraform deployment and a stable state file.
 
-## Known Limitations
+## Important Notes
 
-- **Peering Limit**: The number of peerings is limited to three for existing customers using public peering. New customers should only deploy private or Microsoft peerings as per their requirements. Refer to the [retirement notice for Public Peering](https://azure.microsoft.com/en-us/updates/retirement-notice-migrate-from-public-peering-by-march-31-2024/).
-
-- **Private Link Fast Path**: Private link fast path is currently disabled due to a [known issue](https://github.com/hashicorp/terraform-provider-azurerm/issues/26746).
+- **Peering Limit**: The number of peerings is limited to three for existing customers using public peering. New ER deployments should only deploy private or Microsoft peerings. Refer to the [retirement notice for Public Peering](https://azure.microsoft.com/en-us/updates/retirement-notice-migrate-from-public-peering-by-march-31-2024/).
 
 - **Gateway Connection Clarification**: When deploying a connection, ensure that you distinguish between a **Virtual Network Gateway** and an **ExpressRoute Gateway**. The former is deployed in Virtual Networks, while the latter is used in Virtual WANs. In Terraform, they are represented as two different resource types, and we've separated them by variable definition for ease of deployment.
    
@@ -48,7 +46,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.5)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (> 3.71, <= 3.99.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.116.0, < 4.0)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
@@ -513,7 +511,7 @@ Description: (Optional) A map of association objects to create connections betwe
 - `authorization_key` - (Optional) The authorization key associated with the Express Route Circuit.
 - `routing_weight` - (Optional) The routing weight. Defaults to 0.
 - `express_route_gateway_bypass` - (Optional) If true, data packets will bypass ExpressRoute Gateway for data forwarding.
-- `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express\_route\_gateway\_bypass must be set to true. Defaults to false.
+- `private_link_fast_path_enabled` - (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express\_route\_gateway\_bypass must be set to true. Defaults to false.
 - `tags` - (Optional) A mapping of tags to assign to the resource.
 
 Example Input:
@@ -540,9 +538,9 @@ map(object({
     authorization_key                   = optional(string, null)
     routing_weight                      = optional(number, 0)
     express_route_gateway_bypass        = optional(bool, false)
-    # private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
-    shared_key = optional(string, null)
-    tags       = optional(map(string), null)
+    private_link_fast_path_enabled      = optional(bool, false)
+    shared_key                          = optional(string, null)
+    tags                                = optional(map(string), null)
   }))
 ```
 

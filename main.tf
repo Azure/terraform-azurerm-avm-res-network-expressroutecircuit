@@ -57,18 +57,18 @@ resource "azurerm_express_route_circuit_peering" "this" {
 resource "azurerm_virtual_network_gateway_connection" "this" {
   for_each = var.vnet_gw_connections
 
-  location                     = each.value.location
-  name                         = coalesce(each.value.name, "con-${azurerm_express_route_circuit.this.name}-${regexall("[/\\w-\\.]+\\/([\\w-]+)", tostring(each.value.virtual_network_gateway_resource_id))[0][0]}")
-  resource_group_name          = each.value.resource_group_name
-  type                         = "ExpressRoute"
-  virtual_network_gateway_id   = each.value.virtual_network_gateway_resource_id
-  authorization_key            = each.value.authorization_key
-  express_route_circuit_id     = azurerm_express_route_circuit.this.id
-  express_route_gateway_bypass = each.value.express_route_gateway_bypass
-  routing_weight               = each.value.routing_weight
-  # private_link_fast_path_enabled = each.value.private_link_fast_path_enabled # disabled due to bug #26746
-  shared_key = each.value.shared_key
-  tags       = each.value.tags
+  location                       = each.value.location
+  name                           = coalesce(each.value.name, "con-${azurerm_express_route_circuit.this.name}-${regexall("[/\\w-\\.]+\\/([\\w-]+)", tostring(each.value.virtual_network_gateway_resource_id))[0][0]}")
+  resource_group_name            = each.value.resource_group_name
+  type                           = "ExpressRoute"
+  virtual_network_gateway_id     = each.value.virtual_network_gateway_resource_id
+  authorization_key              = each.value.authorization_key
+  express_route_circuit_id       = azurerm_express_route_circuit.this.id
+  express_route_gateway_bypass   = each.value.express_route_gateway_bypass
+  private_link_fast_path_enabled = each.value.private_link_fast_path_enabled
+  routing_weight                 = each.value.routing_weight
+  shared_key                     = each.value.shared_key
+  tags                           = each.value.tags
 
   # Depends on is necessary here because deployment of a connection before the peering has complete will cause the connection to be created in a failed state.
   depends_on = [azurerm_express_route_circuit_peering.this]
