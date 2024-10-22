@@ -65,8 +65,8 @@ resource "azurerm_virtual_network_gateway_connection" "this" {
   authorization_key              = each.value.authorization_key
   express_route_circuit_id       = azurerm_express_route_circuit.this.id
   express_route_gateway_bypass   = each.value.express_route_gateway_bypass
-  routing_weight                 = each.value.routing_weight
   private_link_fast_path_enabled = each.value.private_link_fast_path_enabled
+  routing_weight                 = each.value.routing_weight
   shared_key                     = each.value.shared_key
   tags                           = each.value.tags
 
