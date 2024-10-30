@@ -86,21 +86,9 @@ Description: (Required) The name of the ExpressRoute Circuit. Changing this forc
 
 Type: `string`
 
-### <a name="input_peering_location"></a> [peering\_location](#input\_peering\_location)
-
-Description: (Required) The peering location.
-
-Type: `string`
-
 ### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
 
 Description: (Required) The name of the resource group where the resources will be deployed.
-
-Type: `string`
-
-### <a name="input_service_provider_name"></a> [service\_provider\_name](#input\_service\_provider\_name)
-
-Description: (Required) The name of the service provider.
 
 Type: `string`
 
@@ -123,7 +111,7 @@ The following input variables are optional (have default values):
 
 ### <a name="input_allow_classic_operations"></a> [allow\_classic\_operations](#input\_allow\_classic\_operations)
 
-Description: (Optional) Allow classic operations.
+Description: (Optional) Allow the circuit to interact with classic (RDFE) resources. Defaults to false.
 
 Type: `bool`
 
@@ -131,7 +119,7 @@ Default: `false`
 
 ### <a name="input_authorization_key"></a> [authorization\_key](#input\_authorization\_key)
 
-Description: (Optional) The authorization key of the ExpressRoute Circuit.
+Description: (Optional) The authorization key. This can be used to set up an ExpressRoute Circuit with an ExpressRoute Port from another subscription.
 
 Type: `string`
 
@@ -139,7 +127,7 @@ Default: `null`
 
 ### <a name="input_bandwidth_in_gbps"></a> [bandwidth\_in\_gbps](#input\_bandwidth\_in\_gbps)
 
-Description: (Optional) The bandwidth in Gbps.
+Description: (Optional) The bandwidth in Gbps of the circuit being created on the Express Route Port.
 
 Type: `number`
 
@@ -147,33 +135,9 @@ Default: `null`
 
 ### <a name="input_bandwidth_in_mbps"></a> [bandwidth\_in\_mbps](#input\_bandwidth\_in\_mbps)
 
-Description: (Optional) The bandwidth in Mbps.
+Description: (Optional) The bandwidth in Mbps of the circuit being created on the Service Provider.
 
 Type: `number`
-
-Default: `null`
-
-### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
-
-Description: A map describing customer-managed keys to associate with the resource. This includes the following properties:
-- `key_vault_resource_id` - The resource ID of the Key Vault where the key is stored.
-- `key_name` - The name of the key.
-- `key_version` - (Optional) The version of the key. If not specified, the latest version is used.
-- `user_assigned_identity` - (Optional) An object representing a user-assigned identity with the following properties:
-  - `resource_id` - The resource ID of the user-assigned identity.
-
-Type:
-
-```hcl
-object({
-    key_vault_resource_id = string
-    key_name              = string
-    key_version           = optional(string, null)
-    user_assigned_identity = optional(object({
-      resource_id = string
-    }), null)
-  })
-```
 
 Default: `null`
 
@@ -324,7 +288,7 @@ Default: `{}`
 
 ### <a name="input_express_route_port_resource_id"></a> [express\_route\_port\_resource\_id](#input\_express\_route\_port\_resource\_id)
 
-Description:   (Optional) The ID of the ExpressRoute Port.
+Description: (Optional) The ID of the Express Route Port this Express Route Circuit is based on. Changing this forces a new resource to be created.
 
 Type: `string`
 
@@ -353,6 +317,14 @@ object({
     name = optional(string, null)
   })
 ```
+
+Default: `null`
+
+### <a name="input_peering_location"></a> [peering\_location](#input\_peering\_location)
+
+Description: (Optional) The peering location.
+
+Type: `string`
 
 Default: `null`
 
@@ -491,6 +463,14 @@ map(object({
 ```
 
 Default: `{}`
+
+### <a name="input_service_provider_name"></a> [service\_provider\_name](#input\_service\_provider\_name)
+
+Description: (Optional) The name of the service provider.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
