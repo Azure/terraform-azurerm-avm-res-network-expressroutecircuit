@@ -27,7 +27,7 @@ variable "sku" {
     family = string
   })
   description = <<DESCRIPTION
-(Required) The SKU of the ExpressRoute Circuit.
+(Required) A sku block for the ExpressRoute circuit.
 DESCRIPTION
   nullable    = false
 
@@ -61,7 +61,7 @@ variable "bandwidth_in_gbps" {
   type        = number
   default     = null
   description = <<DESCRIPTION
-(Optional) The bandwidth in Gbps of the circuit being created on the Express Route Port.
+(Optional) The bandwidth in Gbps of the circuit being created on the Express Route Port, should be set when the circuit is created with ER Direct.
 DESCRIPTION
 }
 
@@ -69,7 +69,7 @@ variable "bandwidth_in_mbps" {
   type        = number
   default     = null
   description = <<DESCRIPTION
-(Optional) The bandwidth in Mbps of the circuit being created on the Service Provider.
+(Optional) The bandwidth in Mbps of the circuit being created on the Service Provider, should be set when the circuit is created with a provider.
 DESCRIPTION
 }
 
@@ -271,7 +271,8 @@ variable "peering_location" {
   type        = string
   default     = null
   description = <<DESCRIPTION
-(Optional) The peering location.
+(Optional) The name of the peering location and not the Azure resource location. Changing this forces a new resource to be created.
+Don't set this parameter if the circuit is created with an ER Direct.
 DESCRIPTION
 }
 
@@ -433,7 +434,7 @@ variable "service_provider_name" {
   type        = string
   default     = null
   description = <<DESCRIPTION
-(Optional) The name of the service provider.
+(Optional) The name of the ExpressRoute Service Provider. Changing this forces a new resource to be created.
 DESCRIPTION
 }
 
