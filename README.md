@@ -94,7 +94,7 @@ Type: `string`
 
 ### <a name="input_sku"></a> [sku](#input\_sku)
 
-Description: (Required) The SKU of the ExpressRoute Circuit.
+Description: (Required) A sku block for the ExpressRoute circuit.
 
 Type:
 
@@ -127,7 +127,7 @@ Default: `null`
 
 ### <a name="input_bandwidth_in_gbps"></a> [bandwidth\_in\_gbps](#input\_bandwidth\_in\_gbps)
 
-Description: (Optional) The bandwidth in Gbps of the circuit being created on the Express Route Port.
+Description: (Optional) The bandwidth in Gbps of the circuit being created on the Express Route Port, should be set when the circuit is created with ER Direct.
 
 Type: `number`
 
@@ -135,7 +135,7 @@ Default: `null`
 
 ### <a name="input_bandwidth_in_mbps"></a> [bandwidth\_in\_mbps](#input\_bandwidth\_in\_mbps)
 
-Description: (Optional) The bandwidth in Mbps of the circuit being created on the Service Provider.
+Description: (Optional) The bandwidth in Mbps of the circuit being created on the Service Provider, should be set when the circuit is created with a provider.
 
 Type: `number`
 
@@ -322,7 +322,8 @@ Default: `null`
 
 ### <a name="input_peering_location"></a> [peering\_location](#input\_peering\_location)
 
-Description: (Optional) The peering location.
+Description: (Optional) The name of the peering location and not the Azure resource location. Changing this forces a new resource to be created.  
+Don't set this parameter if the circuit is created with an ER Direct.
 
 Type: `string`
 
@@ -466,7 +467,7 @@ Default: `{}`
 
 ### <a name="input_service_provider_name"></a> [service\_provider\_name](#input\_service\_provider\_name)
 
-Description: (Optional) The name of the service provider.
+Description: (Optional) The name of the ExpressRoute Service Provider. Changing this forces a new resource to be created.
 
 Type: `string`
 
