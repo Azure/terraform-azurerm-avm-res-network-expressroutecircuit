@@ -13,27 +13,11 @@ variable "name" {
 DESCRIPTION
 }
 
-variable "peering_location" {
-  type        = string
-  description = <<DESCRIPTION
-(Required) The peering location.
-DESCRIPTION
-  nullable    = false
-}
-
 variable "resource_group_name" {
   type        = string
   description = <<DESCRIPTION
 (Required) The name of the resource group where the resources will be deployed. 
 DESCRIPTION  
-  nullable    = false
-}
-
-variable "service_provider_name" {
-  type        = string
-  description = <<DESCRIPTION
-(Required) The name of the service provider.
-DESCRIPTION
   nullable    = false
 }
 
@@ -43,7 +27,7 @@ variable "sku" {
     family = string
   })
   description = <<DESCRIPTION
-(Required) The SKU of the ExpressRoute Circuit.
+(Required) A sku block for the ExpressRoute circuit.
 DESCRIPTION
   nullable    = false
 
@@ -61,7 +45,7 @@ variable "allow_classic_operations" {
   type        = bool
   default     = false
   description = <<DESCRIPTION
-(Optional) Allow classic operations.
+(Optional) Allow the circuit to interact with classic (RDFE) resources. Defaults to false.
 DESCRIPTION
 }
 
@@ -69,7 +53,7 @@ variable "authorization_key" {
   type        = string
   default     = null
   description = <<DESCRIPTION
-(Optional) The authorization key of the ExpressRoute Circuit.
+(Optional) The authorization key. This can be used to set up an ExpressRoute Circuit with an ExpressRoute Port from another subscription.
 DESCRIPTION
 }
 
@@ -77,7 +61,7 @@ variable "bandwidth_in_gbps" {
   type        = number
   default     = null
   description = <<DESCRIPTION
-(Optional) The bandwidth in Gbps.
+(Optional) The bandwidth in Gbps of the circuit being created on the Express Route Port, should be set when the circuit is created with ER Direct.
 DESCRIPTION
 }
 
@@ -85,31 +69,8 @@ variable "bandwidth_in_mbps" {
   type        = number
   default     = null
   description = <<DESCRIPTION
-(Optional) The bandwidth in Mbps.
+(Optional) The bandwidth in Mbps of the circuit being created on the Service Provider, should be set when the circuit is created with a provider.
 DESCRIPTION
-}
-
-# required AVM interfaces
-# remove only if not supported by the resource
-# tflint-ignore: terraform_unused_declarations
-variable "customer_managed_key" {
-  type = object({
-    key_vault_resource_id = string
-    key_name              = string
-    key_version           = optional(string, null)
-    user_assigned_identity = optional(object({
-      resource_id = string
-    }), null)
-  })
-  default     = null
-  description = <<DESCRIPTION
-A map describing customer-managed keys to associate with the resource. This includes the following properties:
-- `key_vault_resource_id` - The resource ID of the Key Vault where the key is stored.
-- `key_name` - The name of the key.
-- `key_version` - (Optional) The version of the key. If not specified, the latest version is used.
-- `user_assigned_identity` - (Optional) An object representing a user-assigned identity with the following properties:
-  - `resource_id` - The resource ID of the user-assigned identity.
-DESCRIPTION  
 }
 
 variable "diagnostic_settings" {
@@ -275,7 +236,7 @@ variable "express_route_port_resource_id" {
   type        = string
   default     = null
   description = <<DESCRIPTION
-  (Optional) The ID of the ExpressRoute Port.
+(Optional) The ID of the Express Route Port this Express Route Circuit is based on. Changing this forces a new resource to be created.
 DESCRIPTION
 }
 
@@ -304,6 +265,15 @@ DESCRIPTION
     condition     = var.lock != null ? contains(["CanNotDelete", "ReadOnly"], var.lock.kind) : true
     error_message = "The lock level must be one of: 'None', 'CanNotDelete', or 'ReadOnly'."
   }
+}
+
+variable "peering_location" {
+  type        = string
+  default     = null
+  description = <<DESCRIPTION
+(Optional) The name of the peering location and not the Azure resource location. Changing this forces a new resource to be created.
+Don't set this parameter if the circuit is created with an ER Direct.
+DESCRIPTION
 }
 
 variable "peerings" {
@@ -458,6 +428,14 @@ A map of role assignments to create on this resource. The map key is deliberatel
 > Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.
 DESCRIPTION
   nullable    = false
+}
+
+variable "service_provider_name" {
+  type        = string
+  default     = null
+  description = <<DESCRIPTION
+(Optional) The name of the ExpressRoute Service Provider. Changing this forces a new resource to be created.
+DESCRIPTION
 }
 
 # tflint-ignore: terraform_unused_declarations
