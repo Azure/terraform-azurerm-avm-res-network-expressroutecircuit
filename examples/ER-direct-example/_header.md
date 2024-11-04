@@ -1,4 +1,4 @@
-# Azure ExpressRoute Circuit Module - Default Example
+# Azure ExpressRoute Circuit Module - with Express Route Direct
 
 This example demonstrates how to deploy an Azure ExpressRoute Circuit using the module over a ExpressRoute Direct port.
 
