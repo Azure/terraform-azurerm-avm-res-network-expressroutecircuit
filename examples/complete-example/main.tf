@@ -39,14 +39,18 @@ locals {
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
-module "regions" {
-  source  = "Azure/regions/azurerm"
-  version = "~> 0.3"
+# module "regions" {
+#   source  = "Azure/regions/azurerm"
+#   version = "~> 0.3"
+# }
+module "avm-utl-regions" {
+  source  = "Azure/avm-utl-regions/azurerm"
+  version = "~> 0.3.0"
 }
 
 # This allows us to randomize the region for the resource group.
 resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
+  max = length(module.avm-utl-regions.regions) - 1
   min = 0
 }
 ## End of section to provide a random Azure region for the resource group
