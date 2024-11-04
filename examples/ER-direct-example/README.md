@@ -42,14 +42,14 @@ locals {
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
-module "regions" {
-  source  = "Azure/regions/azurerm"
-  version = "~> 0.3"
+module "avm-utl-regions" {
+  source  = "Azure/avm-utl-regions/azurerm"
+  version = "~> 0.3.0"
 }
 
 # This allows us to randomize the region for the resource group.
 resource "random_integer" "region_index" {
-  max = length(module.regions.regions) - 1
+  max = length(module.avm-utl-regions.regions) - 1
   min = 0
 }
 ## End of section to provide a random Azure region for the resource group
@@ -62,7 +62,7 @@ module "naming" {
 
 # This is required for resource modules
 resource "azurerm_resource_group" "this" {
-  location = module.regions.regions[random_integer.region_index.result].name
+  location = module.avm-utl-regions.regions[random_integer.region_index.result].name
   name     = module.naming.resource_group.name_unique
 }
 
@@ -148,6 +148,12 @@ No outputs.
 
 The following Modules are called:
 
+### <a name="module_avm-utl-regions"></a> [avm-utl-regions](#module\_avm-utl-regions)
+
+Source: Azure/avm-utl-regions/azurerm
+
+Version: ~> 0.3.0
+
 ### <a name="module_exr_circuit_test"></a> [exr\_circuit\_test](#module\_exr\_circuit\_test)
 
 Source: ../../
@@ -157,12 +163,6 @@ Version:
 ### <a name="module_naming"></a> [naming](#module\_naming)
 
 Source: Azure/naming/azurerm
-
-Version: ~> 0.3
-
-### <a name="module_regions"></a> [regions](#module\_regions)
-
-Source: Azure/regions/azurerm
 
 Version: ~> 0.3
 
