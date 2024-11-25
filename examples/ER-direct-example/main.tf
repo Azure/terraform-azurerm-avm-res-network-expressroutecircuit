@@ -22,11 +22,12 @@ provider "azurerm" {
 }
 
 locals {
-  bandwidth_in_mbps     = 50
-  family                = "MeteredData"
-  peering_location      = "Seattle"
-  service_provider_name = "Equinix"
-  tier                  = "Premium"
+  bandwidth_in_gbps = 10
+  encapsulation     = "Dot1Q"
+  erd_port_name     = "office1"
+  family            = "MeteredData"
+  peering_location  = "Equinix-Amsterdam-AM5"
+  tier              = "Premium"
 }
 
 ## Section to provide a random Azure region for the resource group
@@ -55,15 +56,32 @@ resource "azurerm_resource_group" "this" {
   name     = module.naming.resource_group.name_unique
 }
 
+resource "azurerm_express_route_port" "example" {
+  bandwidth_in_gbps   = local.bandwidth_in_gbps
+  encapsulation       = local.encapsulation
+  location            = azurerm_resource_group.this.location
+  name                = "erd-${local.erd_port_name}"
+  peering_location    = local.peering_location
+  resource_group_name = azurerm_resource_group.this.name
+
+  link1 {
+    admin_enabled = false
+    macsec_cipher = "GcmAes256"
+  }
+  link2 {
+    admin_enabled = false
+    macsec_cipher = "GcmAes256"
+  }
+}
+
 # This is the module call
 module "exr_circuit_test" {
-  source                = "../../"
-  resource_group_name   = azurerm_resource_group.this.name
-  name                  = module.naming.express_route_circuit.name_unique
-  service_provider_name = local.service_provider_name
-  peering_location      = local.peering_location
-  bandwidth_in_mbps     = local.bandwidth_in_mbps
-  location              = azurerm_resource_group.this.location
+  source                         = "../../"
+  resource_group_name            = azurerm_resource_group.this.name
+  name                           = module.naming.express_route_circuit.name_unique
+  express_route_port_resource_id = azurerm_express_route_port.example.id
+  bandwidth_in_gbps              = 10
+  location                       = azurerm_resource_group.this.location
 
   sku = {
     tier   = local.tier
