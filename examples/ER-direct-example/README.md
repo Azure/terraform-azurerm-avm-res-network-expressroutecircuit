@@ -1,11 +1,11 @@
 <!-- BEGIN_TF_DOCS -->
-# Azure ExpressRoute Circuit Module - Default Example
+# Azure ExpressRoute Circuit Module - with Express Route Direct
 
-This example demonstrates how to deploy an Azure ExpressRoute Circuit using the module without deploying any additional dependencies such as peering or connections. This setup is ideal if you want to provision the circuit first and handle the dependent resources separately at a later stage.
+This example demonstrates how to deploy an Azure ExpressRoute Circuit using the module over a ExpressRoute Direct port.
 
 ## This example will:
- - Deploy an ExpressRoute Circuit in a specified region.
- - Output the Service Key required by your service provider to activate the circuit.
+ - Deploy an ExpressRoute Direct port
+ - Deploy an ExpressRoute Circuit connected to the port.
 
 ```hcl
 terraform {
@@ -32,11 +32,12 @@ provider "azurerm" {
 }
 
 locals {
-  bandwidth_in_mbps     = 50
-  family                = "MeteredData"
-  peering_location      = "Seattle"
-  service_provider_name = "Equinix"
-  tier                  = "Premium"
+  bandwidth_in_gbps = 10
+  encapsulation     = "Dot1Q"
+  erd_port_name     = "office1"
+  family            = "MeteredData"
+  peering_location  = "Equinix-Amsterdam-AM5"
+  tier              = "Premium"
 }
 
 ## Section to provide a random Azure region for the resource group
@@ -65,15 +66,32 @@ resource "azurerm_resource_group" "this" {
   name     = module.naming.resource_group.name_unique
 }
 
+resource "azurerm_express_route_port" "example" {
+  bandwidth_in_gbps   = local.bandwidth_in_gbps
+  encapsulation       = local.encapsulation
+  location            = azurerm_resource_group.this.location
+  name                = "erd-${local.erd_port_name}"
+  peering_location    = local.peering_location
+  resource_group_name = azurerm_resource_group.this.name
+
+  link1 {
+    admin_enabled = false
+    macsec_cipher = "GcmAes256"
+  }
+  link2 {
+    admin_enabled = false
+    macsec_cipher = "GcmAes256"
+  }
+}
+
 # This is the module call
 module "exr_circuit_test" {
-  source                = "../../"
-  resource_group_name   = azurerm_resource_group.this.name
-  name                  = module.naming.express_route_circuit.name_unique
-  service_provider_name = local.service_provider_name
-  peering_location      = local.peering_location
-  bandwidth_in_mbps     = local.bandwidth_in_mbps
-  location              = azurerm_resource_group.this.location
+  source                         = "../../"
+  resource_group_name            = azurerm_resource_group.this.name
+  name                           = module.naming.express_route_circuit.name_unique
+  express_route_port_resource_id = azurerm_express_route_port.example.id
+  bandwidth_in_gbps              = 10
+  location                       = azurerm_resource_group.this.location
 
   sku = {
     tier   = local.tier
@@ -99,6 +117,7 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
+- [azurerm_express_route_port.example](https://registry.terraform.io/providers/hashicorp/azurerm/3.116.0/docs/resources/express_route_port) (resource)
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/3.116.0/docs/resources/resource_group) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 
