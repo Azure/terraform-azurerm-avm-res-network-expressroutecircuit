@@ -13,11 +13,11 @@ This example demonstrates how to deploy an Azure ExpressRoute Circuit along with
 
 ```hcl
 terraform {
-  required_version = "~> 1.5"
+  required_version = ">= 1.9, < 2.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.116.0"
+      version = ">= 3.116.0, < 5.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -53,14 +53,14 @@ locals {
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
-module "avm-utl-regions" {
+module "avm_utl_regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "~> 0.3.0"
 }
 
 # This allows us to randomize the region for the resource group.
 resource "random_integer" "region_index" {
-  max = length(module.avm-utl-regions.regions) - 1
+  max = length(module.avm_utl_regions.regions) - 1
   min = 0
 }
 ## End of section to provide a random Azure region for the resource group
@@ -238,9 +238,9 @@ resource "azurerm_route_map" "out" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.5)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (3.116.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.116.0, < 5.0)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
@@ -248,10 +248,10 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
-- [azurerm_route_map.in](https://registry.terraform.io/providers/hashicorp/azurerm/3.116.0/docs/resources/route_map) (resource)
-- [azurerm_route_map.out](https://registry.terraform.io/providers/hashicorp/azurerm/3.116.0/docs/resources/route_map) (resource)
-- [azurerm_virtual_hub_route_table.additional](https://registry.terraform.io/providers/hashicorp/azurerm/3.116.0/docs/resources/virtual_hub_route_table) (resource)
-- [azurerm_virtual_hub_route_table.example](https://registry.terraform.io/providers/hashicorp/azurerm/3.116.0/docs/resources/virtual_hub_route_table) (resource)
+- [azurerm_route_map.in](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/route_map) (resource)
+- [azurerm_route_map.out](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/route_map) (resource)
+- [azurerm_virtual_hub_route_table.additional](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_hub_route_table) (resource)
+- [azurerm_virtual_hub_route_table.example](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_hub_route_table) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 
 <!-- markdownlint-disable MD013 -->
@@ -281,7 +281,7 @@ No outputs.
 
 The following Modules are called:
 
-### <a name="module_avm-utl-regions"></a> [avm-utl-regions](#module\_avm-utl-regions)
+### <a name="module_avm_utl_regions"></a> [avm\_utl\_regions](#module\_avm\_utl\_regions)
 
 Source: Azure/avm-utl-regions/azurerm
 
