@@ -27,7 +27,7 @@ terraform {
 }
 
 provider "azurerm" {
-  subscription_id = local.subscription-id
+  subscription_id = local.subscription_id
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
@@ -44,13 +44,13 @@ locals {
   peering_location      = "Seattle"
   resource_group_name   = "SEA-Cust10"
   service_provider_name = "Equinix"
-  subscription-id       = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+  subscription_id       = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
   tier                  = "Premium"
   vng_gw_conn_name      = "vng-gw-conn"
-  vng_gw_id             = "/subscriptions/${local.subscription-id}/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
-  vng_gw_peering_id     = "/subscriptions/${local.subscription-id}/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
-  vwan_gw_id            = "/subscriptions/${local.subscription-id}/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/3f15552377fc4e1ca55ac58af5d7a67e-westus2-er-gw"
-  vwan_hub_id           = "/subscriptions/${local.subscription-id}/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
+  vng_gw_id             = "/subscriptions/${local.subscription_id}/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
+  vng_gw_peering_id     = "/subscriptions/${local.subscription_id}/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
+  vwan_gw_id            = "/subscriptions/${local.subscription_id}/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/3f15552377fc4e1ca55ac58af5d7a67e-westus2-er-gw"
+  vwan_hub_id           = "/subscriptions/${local.subscription_id}/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
 }
 
 ## Section to provide a random Azure region for the resource group
