@@ -44,9 +44,9 @@ We welcome your feedback! If you encounter any issues or have feature requests, 
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.5)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.116.0, < 4.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
@@ -196,7 +196,6 @@ Description: (Optional) A map of association objects to create connections betwe
 - `authorization_key` - (Optional) The authorization key to establish the Express Route Connection.
 - `enable_internet_security` - (Optional) Set Internet security for this Express Route Connection.
 - `express_route_gateway_bypass_enabled` - (Optional) Specified whether Fast Path is enabled for Virtual Wan Firewall Hub. Defaults to false.
-- `private_link_fast_path_enabled` - [Currently disabled due to bug #26746] (Optional) Bypass the Express Route gateway when accessing private-links. When enabled express\_route\_gateway\_bypass\_enabled must be set to true. Defaults to false.
 - `routing_weight` - (Optional) The routing weight associated to the Express Route Connection. Possible value is between 0 and 32000. Defaults to 0.
 - `routing` - (Optional) A routing block.
   - `associated_route_table_resource_id` - (Optional) The ID of the Virtual Hub Route Table associated with this Express Route Connection.
@@ -211,11 +210,11 @@ Example Input:
 ```terraform
 er_gw_connections = {
   connection1er = {
-    name                             = "ExRConnection-westus2-er"
+    name                                      = "ExRConnection-westus2-er"
     express_route_gateway_resource_id         = local.same_rg_er_gw_resource_id
     express_route_circuit_peering_resource_id = local.same_rg_er_peering_resource_id
-    peering_map_key = "firstPeeringConfig"
-    routeting_weight = 0
+    peering_map_key                           = "firstPeeringConfig"
+    routeting_weight                          = 0
     routing = {
       inbound_route_map_resource_id         = azurerm_route_map.in.id
       outbound_route_map_resource_id        = azurerm_route_map.out.id
@@ -241,8 +240,7 @@ map(object({
     authorization_key                         = optional(string, null)
     enable_internet_security                  = optional(bool, false)
     express_route_gateway_bypass_enabled      = optional(bool, false)
-    # private_link_fast_path_enabled = optional(bool, false) # disabled due to bug #26746
-    routing_weight = optional(number, 0)
+    routing_weight                            = optional(number, 0)
     routing = optional(object({
       associated_route_table_resource_id = optional(string)
       inbound_route_map_resource_id      = optional(string)

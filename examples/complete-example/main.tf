@@ -1,9 +1,9 @@
 terraform {
-  required_version = "~> 1.5"
+  required_version = ">= 1.9, < 2.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.116.0"
+      version = "~> 4.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -13,12 +13,13 @@ terraform {
 }
 
 provider "azurerm" {
+  subscription_id = local.subscription_id
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
     }
   }
-  skip_provider_registration = true
+  resource_provider_registrations = "none"
 }
 
 locals {
@@ -29,24 +30,25 @@ locals {
   peering_location      = "Seattle"
   resource_group_name   = "SEA-Cust10"
   service_provider_name = "Equinix"
+  subscription_id       = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
   tier                  = "Premium"
   vng_gw_conn_name      = "vng-gw-conn"
-  vng_gw_id             = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
-  vng_gw_peering_id     = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
-  vwan_gw_id            = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/3f15552377fc4e1ca55ac58af5d7a67e-westus2-er-gw"
-  vwan_hub_id           = "/subscriptions/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
+  vng_gw_id             = "/subscriptions/${local.subscription_id}/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualNetworkGateways/er-gateway"
+  vng_gw_peering_id     = "/subscriptions/${local.subscription_id}/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteCircuits/SEA-Cust10-ER/peerings/AzurePrivatePeering"
+  vwan_gw_id            = "/subscriptions/${local.subscription_id}/resourceGroups/SEA-Cust10/providers/Microsoft.Network/expressRouteGateways/3f15552377fc4e1ca55ac58af5d7a67e-westus2-er-gw"
+  vwan_hub_id           = "/subscriptions/${local.subscription_id}/resourceGroups/SEA-Cust10/providers/Microsoft.Network/virtualHubs/wus2-hub"
 }
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
-module "avm-utl-regions" {
+module "avm_utl_regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "~> 0.3.0"
 }
 
 # This allows us to randomize the region for the resource group.
 resource "random_integer" "region_index" {
-  max = length(module.avm-utl-regions.regions) - 1
+  max = length(module.avm_utl_regions.regions) - 1
   min = 0
 }
 ## End of section to provide a random Azure region for the resource group
@@ -138,7 +140,7 @@ module "exr_circuit_test" {
 
   er_gw_connections = {
     connection-er = {
-      #name                                 = "ExRConnection-westus2-er"
+      #name                                     = "ExRConnection-westus2-er"
       express_route_gateway_resource_id         = local.vwan_gw_id
       express_route_circuit_peering_resource_id = local.vng_gw_peering_id
       peering_map_key                           = "firstPeeringConfig"
