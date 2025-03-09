@@ -59,3 +59,4 @@ avm.tflint_module.merged.hcl
 *.old
 *.bkp
 *.depricated
+examples/*/policy
