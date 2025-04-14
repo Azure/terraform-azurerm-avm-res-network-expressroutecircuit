@@ -168,3 +168,17 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
     }
   }
 }
+
+resource "azurerm_express_route_circuit_connection" "this" {
+  for_each = var.circuit_connections
+
+  address_prefix_ipv4 = each.value.address_prefix_ipv4
+  name                = each.value.name
+  peer_peering_id     = each.value.peer_peering_resource_id
+  peering_id          = coalesce(each.value.peer_resource_id, try(azurerm_express_route_circuit_peering.this[each.value.peer_map_key].id, ""))
+  address_prefix_ipv6 = each.value.address_prefix_ipv6
+  authorization_key   = each.value.authorization_key
+
+  # Depends on is necessary here because deployment of a connection before the peering has complete will cause a failure.
+  depends_on = [azurerm_express_route_circuit_peering.this]
+}

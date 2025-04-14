@@ -73,6 +73,44 @@ variable "bandwidth_in_mbps" {
 DESCRIPTION
 }
 
+variable "circuit_connections" {
+  type = map(object({
+    name                     = string
+    peer_resource_id         = optional(string, null)
+    peer_map_key             = optional(string, null)
+    peer_peering_resource_id = string
+    address_prefix_ipv4      = string
+    authorization_key        = optional(string, null)
+    address_prefix_ipv6      = optional(string, null)
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+A map of circuit to circuit connections (Global Reach).
+
+- `name` - (Required) The name of the circuit connection.
+- `peer_resource_id` - (Optional) The id of the private peering to associate to. Note: Either `peer_resource_id` or `peer_map_key` must be set.
+- `peer_map_key` - (Optional) The key of the private peering variable to associate to . Note: Either `peer_map_key` or `peer_resource_id` must be set.
+- `peer_peering_id` - (Required) The ID of the peering private peering to connect to.
+- `address_prefix_ipv4` - (Required) The IPv4 address prefix.
+- `authorization_key` - (Optional) The authorization key to establish the Express Route Connection.
+- `address_prefix_ipv6` - (Optional) The IPv6 address prefix.
+
+Example Input:
+
+```terraform
+circuit_connections = {
+  global_reach_westeu_to_uk = {
+    name                     = "globalreach_ams_to_uk"
+    peer_map_key             = "PrivatePeeringConfig"
+    peer_peering_resource_id = module.er_circuit_2.peerings["PrivatePeeringConfig"].id
+    address_prefix_ipv4      = "192.168.8.0/29"
+  }
+}
+```
+DESCRIPTION
+  nullable    = false
+}
+
 variable "diagnostic_settings" {
   type = map(object({
     name                                     = optional(string, null)
@@ -88,7 +126,7 @@ variable "diagnostic_settings" {
   }))
   default     = {}
   description = <<DESCRIPTION
-A map of diagnostic settings to create on the Key Vault. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+A map of diagnostic settings to create on the Circuit. 
 
 - `name` - (Optional) The name of the diagnostic setting. One will be generated if not set, however this will not be unique if you want to create multiple diagnostic setting resources.
 - `log_categories` - (Optional) A set of log categories to send to the log analytics workspace. Defaults to `[]`.
@@ -152,9 +190,9 @@ variable "er_gw_connections" {
   description = <<DESCRIPTION
 (Optional) A map of association objects to create connections between the created circuit and the designated gateways. 
 
-- `name` - (Required) The name of the connection.
+- `name` - (Optional) The name of the connection, if no name is provided a default is generated.
 - `express_route_circuit_peering_resource_id` - (Optional) The id of the peering to associate to. Note: Either `express_route_circuit_peering_resource_id` or `peering_map_key` must be set.
-- `peering_map_key` - (Optional) The key of the peering variable to associate to. Note: Either `peering_map_key` or `express_route_circuit_peering_resource_id` or must be set.
+- `peering_map_key` - (Optional) The key of the peering variable to associate to. Note: Either `peering_map_key` or `express_route_circuit_peering_resource_id` must be set.
 - `express_route_gateway_resource_id` - (Required) Resource ID of the Express Route Gateway.
 - `authorization_key` - (Optional) The authorization key to establish the Express Route Connection.
 - `enable_internet_security` - (Optional) Set Internet security for this Express Route Connection.

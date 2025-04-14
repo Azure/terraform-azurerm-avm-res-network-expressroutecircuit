@@ -154,10 +154,10 @@ module "exr_circuit_test" {
 
   er_gw_connections = {
     connection-er = {
-      #name                                     = "ExRConnection-westus2-er"
+      name                                      = "ExRConnection-westus2-er"
       express_route_gateway_resource_id         = local.vwan_gw_id
       express_route_circuit_peering_resource_id = local.vng_gw_peering_id
-      peering_map_key                           = "firstPeeringConfig"
+      peering_map_key                           = "firstPeeringConfig" # References the map key of the private peering as defined above in the peerings block, you could alternatively supply the explicit peering resource ID with the variable `express_route_circuit_peering_resource_id`.
       routeting_weight                          = 0
       express_route_gateway_bypass_enabled      = true
       routing = {
