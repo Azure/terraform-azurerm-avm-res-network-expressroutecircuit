@@ -10,6 +10,7 @@ This example demonstrates how to deploy an Azure ExpressRoute Circuit using the 
 ```hcl
 terraform {
   required_version = ">= 1.9, < 2.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -86,19 +87,18 @@ resource "azurerm_express_route_port" "example" {
 
 # This is the module call
 module "exr_circuit_test" {
-  source                         = "../../"
-  resource_group_name            = azurerm_resource_group.this.name
-  name                           = module.naming.express_route_circuit.name_unique
-  express_route_port_resource_id = azurerm_express_route_port.example.id
-  bandwidth_in_gbps              = 10
-  location                       = azurerm_resource_group.this.location
+  source = "../../"
 
+  location            = azurerm_resource_group.this.location
+  name                = module.naming.express_route_circuit.name_unique
+  resource_group_name = azurerm_resource_group.this.name
   sku = {
     tier   = local.tier
     family = local.family
   }
-
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  bandwidth_in_gbps              = 10
+  enable_telemetry               = var.enable_telemetry # see variables.tf
+  express_route_port_resource_id = azurerm_express_route_port.example.id
 }
 ```
 

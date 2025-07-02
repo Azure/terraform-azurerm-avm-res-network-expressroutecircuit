@@ -1,5 +1,6 @@
 terraform {
   required_version = ">= 1.9, < 2.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -100,18 +101,26 @@ resource "azurerm_express_route_port" "erd_port_2" {
 
 # Circuit 1 creation
 module "er_circuit_1" {
-  source                         = "../../"
-  resource_group_name            = azurerm_resource_group.this.name
-  name                           = local.erc1_name
-  express_route_port_resource_id = azurerm_express_route_port.erd_port_1.id
-  bandwidth_in_gbps              = 10
-  location                       = azurerm_resource_group.this.location
+  source = "../../"
 
+  location            = azurerm_resource_group.this.location
+  name                = local.erc1_name
+  resource_group_name = azurerm_resource_group.this.name
   sku = {
     tier   = local.tier
     family = local.family
   }
-
+  bandwidth_in_gbps = 10
+  circuit_connections = {
+    west_eu_to_north_eu = {
+      name                     = "globalreach_ams_to_uk"
+      peer_map_key             = "PrivatePeeringConfig" # References the map key of the private peering as defined above in the peerings block, you could alternatively supply the explicit peering resource ID with the variable `peer_resource_id`.
+      peer_peering_resource_id = module.er_circuit_2.peerings["PrivatePeeringConfig"].id
+      address_prefix_ipv4      = "192.168.8.0/29"
+    }
+  }
+  enable_telemetry               = var.enable_telemetry # see variables.tf
+  express_route_port_resource_id = azurerm_express_route_port.erd_port_1.id
   peerings = {
     PrivatePeeringConfig = {
       peering_type                  = "AzurePrivatePeering"
@@ -122,33 +131,22 @@ module "er_circuit_1" {
       vlan_id                       = 300
     }
   }
-
-  circuit_connections = {
-    west_eu_to_north_eu = {
-      name                     = "globalreach_ams_to_uk"
-      peer_map_key             = "PrivatePeeringConfig" # References the map key of the private peering as defined above in the peerings block, you could alternatively supply the explicit peering resource ID with the variable `peer_resource_id`.
-      peer_peering_resource_id = module.er_circuit_2.peerings["PrivatePeeringConfig"].id
-      address_prefix_ipv4      = "192.168.8.0/29"
-    }
-  }
-
-  enable_telemetry = var.enable_telemetry # see variables.tf
 }
 
 # Circuit 2 creation
 module "er_circuit_2" {
-  source                         = "../../"
-  resource_group_name            = azurerm_resource_group.this.name
-  name                           = local.erc2_name
-  express_route_port_resource_id = azurerm_express_route_port.erd_port_2.id
-  bandwidth_in_gbps              = 10
-  location                       = azurerm_resource_group.this.location
+  source = "../../"
 
+  location            = azurerm_resource_group.this.location
+  name                = local.erc2_name
+  resource_group_name = azurerm_resource_group.this.name
   sku = {
     tier   = local.tier
     family = local.family
   }
-
+  bandwidth_in_gbps              = 10
+  enable_telemetry               = var.enable_telemetry # see variables.tf
+  express_route_port_resource_id = azurerm_express_route_port.erd_port_2.id
   peerings = {
     PrivatePeeringConfig = {
       peering_type                  = "AzurePrivatePeering"
@@ -159,6 +157,4 @@ module "er_circuit_2" {
       vlan_id                       = 400
     }
   }
-
-  enable_telemetry = var.enable_telemetry # see variables.tf
 }

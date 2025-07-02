@@ -1,5 +1,6 @@
 terraform {
   required_version = ">= 1.9, < 2.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -57,18 +58,17 @@ resource "azurerm_resource_group" "this" {
 
 # This is the module call
 module "exr_circuit_test" {
-  source                = "../../"
-  resource_group_name   = azurerm_resource_group.this.name
-  name                  = module.naming.express_route_circuit.name_unique
-  service_provider_name = local.service_provider_name
-  peering_location      = local.peering_location
-  bandwidth_in_mbps     = local.bandwidth_in_mbps
-  location              = azurerm_resource_group.this.location
+  source = "../../"
 
+  location            = azurerm_resource_group.this.location
+  name                = module.naming.express_route_circuit.name_unique
+  resource_group_name = azurerm_resource_group.this.name
   sku = {
     tier   = local.tier
     family = local.family
   }
-
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  bandwidth_in_mbps     = local.bandwidth_in_mbps
+  enable_telemetry      = var.enable_telemetry # see variables.tf
+  peering_location      = local.peering_location
+  service_provider_name = local.service_provider_name
 }
