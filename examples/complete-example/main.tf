@@ -1,5 +1,6 @@
 terraform {
   required_version = ">= 1.9, < 2.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -65,19 +66,46 @@ module "naming" {
 # Leaving location as `null` will cause the module to use the resource group location
 # with a data source.
 module "exr_circuit_test" {
-  source                = "../../"
-  resource_group_name   = local.resource_group_name
-  name                  = local.name
-  service_provider_name = local.service_provider_name
-  peering_location      = local.peering_location
-  bandwidth_in_mbps     = local.bandwidth_in_mbps
-  location              = local.location
+  source = "../../"
 
+  location            = local.location
+  name                = local.name
+  resource_group_name = local.resource_group_name
   sku = {
     tier   = local.tier
     family = local.family
   }
-
+  bandwidth_in_mbps = local.bandwidth_in_mbps
+  enable_telemetry  = var.enable_telemetry # see variables.tf
+  er_gw_connections = {
+    connection-er = {
+      name                                      = "ExRConnection-westus2-er"
+      express_route_gateway_resource_id         = local.vwan_gw_id
+      express_route_circuit_peering_resource_id = local.vng_gw_peering_id
+      peering_map_key                           = "firstPeeringConfig" # References the map key of the private peering as defined above in the peerings block, you could alternatively supply the explicit peering resource ID with the variable `express_route_circuit_peering_resource_id`.
+      routeting_weight                          = 0
+      express_route_gateway_bypass_enabled      = true
+      routing = {
+        inbound_route_map_resource_id  = azurerm_route_map.in.id
+        outbound_route_map_resource_id = azurerm_route_map.out.id
+        propagated_route_table = {
+          route_table_resource_ids = [
+            azurerm_virtual_hub_route_table.example.id,
+            azurerm_virtual_hub_route_table.additional.id
+          ]
+        }
+      }
+    }
+  }
+  express_route_circuit_authorizations = {
+    authorization1 = {
+      name = "authorization1"
+    },
+    authorization2 = {
+      name = "authorization2"
+    }
+  }
+  peering_location = local.peering_location
   peerings = {
     firstPeeringConfig = {
       peering_type                  = "AzurePrivatePeering"
@@ -117,16 +145,7 @@ module "exr_circuit_test" {
       }
     }
   }
-
-  express_route_circuit_authorizations = {
-    authorization1 = {
-      name = "authorization1"
-    },
-    authorization2 = {
-      name = "authorization2"
-    }
-  }
-
+  service_provider_name = local.service_provider_name
   vnet_gw_connections = {
     connection-gw = {
       name                                = local.vng_gw_conn_name
@@ -137,29 +156,6 @@ module "exr_circuit_test" {
       private_link_fast_path_enabled      = true
     }
   }
-
-  er_gw_connections = {
-    connection-er = {
-      name                                      = "ExRConnection-westus2-er"
-      express_route_gateway_resource_id         = local.vwan_gw_id
-      express_route_circuit_peering_resource_id = local.vng_gw_peering_id
-      peering_map_key                           = "firstPeeringConfig" # References the map key of the private peering as defined above in the peerings block, you could alternatively supply the explicit peering resource ID with the variable `express_route_circuit_peering_resource_id`.
-      routeting_weight                          = 0
-      express_route_gateway_bypass_enabled      = true
-      routing = {
-        inbound_route_map_resource_id  = azurerm_route_map.in.id
-        outbound_route_map_resource_id = azurerm_route_map.out.id
-        propagated_route_table = {
-          route_table_resource_ids = [
-            azurerm_virtual_hub_route_table.example.id,
-            azurerm_virtual_hub_route_table.additional.id
-          ]
-        }
-      }
-    }
-  }
-
-  enable_telemetry = var.enable_telemetry # see variables.tf
 }
 
 # Create a Route Table (Primary)
