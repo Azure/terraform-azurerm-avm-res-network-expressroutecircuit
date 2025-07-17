@@ -60,3 +60,5 @@ avm.tflint_module.merged.hcl
 *.bkp
 *.depricated
 examples/*/policy
+*.mptfbackup
+.avm
