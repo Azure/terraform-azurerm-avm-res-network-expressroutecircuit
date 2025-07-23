@@ -222,7 +222,7 @@ The following Modules are called:
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: = 0.3.0
+Version: 0.3.0
 
 ### <a name="module_er_circuit_1"></a> [er\_circuit\_1](#module\_er\_circuit\_1)
 
@@ -240,7 +240,7 @@ Version:
 
 Source: Azure/naming/azurerm
 
-Version: = 0.3
+Version: 0.3
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
