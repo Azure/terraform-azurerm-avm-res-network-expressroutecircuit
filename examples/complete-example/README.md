@@ -58,7 +58,7 @@ locals {
 # This allows us to randomize the region for the resource group.
 module "avm_utl_regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.3.0"
+  version = "0.5.2"
 }
 
 # This allows us to randomize the region for the resource group.
@@ -283,7 +283,7 @@ The following Modules are called:
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: 0.3.0
+Version: 0.5.2
 
 ### <a name="module_exr_circuit_test"></a> [exr\_circuit\_test](#module\_exr\_circuit\_test)
 

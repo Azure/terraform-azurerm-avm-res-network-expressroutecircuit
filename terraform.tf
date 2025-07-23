@@ -12,7 +12,7 @@ terraform {
     }
     modtm = {
       source  = "Azure/modtm"
-      version = "0.4.2"
+      version = "0.3.5"
     }
     random = {
       source  = "hashicorp/random"
