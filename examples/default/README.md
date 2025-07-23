@@ -57,7 +57,7 @@ resource "random_integer" "region_index" {
 # This ensures we have unique CAF compliant names for our resources.
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = "0.3"
+  version = "0.4.2"
 }
 
 # This is required for resource modules
@@ -145,7 +145,7 @@ Version:
 
 Source: Azure/naming/azurerm
 
-Version: 0.3
+Version: 0.4.2
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
