@@ -152,7 +152,7 @@ The following Modules are called:
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: ~> 0.3.0
+Version: = 0.3.0
 
 ### <a name="module_exr_circuit_test"></a> [exr\_circuit\_test](#module\_exr\_circuit\_test)
 
@@ -164,7 +164,7 @@ Version:
 
 Source: Azure/naming/azurerm
 
-Version: ~> 0.3
+Version: = 0.3
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
