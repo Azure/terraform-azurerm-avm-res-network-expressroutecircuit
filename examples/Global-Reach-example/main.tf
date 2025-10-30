@@ -6,10 +6,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.5"
-    }
   }
 }
 
@@ -38,20 +34,7 @@ locals {
 }
 
 ## Section to provide a random Azure region for the resource group
-# This allows us to randomize the region for the resource group.
-# module "avm_utl_regions" {
-#   source  = "Azure/avm-utl-regions/azurerm"
-#   version = "0.5.2"
-# }
-
-# # This allows us to randomize the region for the resource group.
-# resource "random_integer" "region_index" {
-#   max = length(module.avm_utl_regions.regions) - 1
-#   min = 0
-# }
-# ## End of section to provide a random Azure region for the resource group
-
-# # This ensures we have unique CAF compliant names for our resources.
+# This ensures we have unique CAF compliant names for our resources.
 module "naming" {
   source  = "Azure/naming/azurerm"
   version = "0.4.2"
