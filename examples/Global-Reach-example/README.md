@@ -44,43 +44,49 @@ locals {
   erd2_peering_location = "Equinix-London-LD5"
   erd2_port_name        = "erd_port_office_2"
   family                = "MeteredData"
+  main_region           = "West Europe"
+  secondary_region      = "UK South"
   tier                  = "Premium"
 }
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
-module "avm_utl_regions" {
-  source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.5.2"
-}
+# module "avm_utl_regions" {
+#   source  = "Azure/avm-utl-regions/azurerm"
+#   version = "0.5.2"
+# }
 
-# This allows us to randomize the region for the resource group.
-resource "random_integer" "region_index" {
-  max = length(module.avm_utl_regions.regions) - 1
-  min = 0
-}
-## End of section to provide a random Azure region for the resource group
+# # This allows us to randomize the region for the resource group.
+# resource "random_integer" "region_index" {
+#   max = length(module.avm_utl_regions.regions) - 1
+#   min = 0
+# }
+# ## End of section to provide a random Azure region for the resource group
 
-# This ensures we have unique CAF compliant names for our resources.
+# # This ensures we have unique CAF compliant names for our resources.
 module "naming" {
   source  = "Azure/naming/azurerm"
   version = "0.4.2"
 }
 
 # This is required for resource modules
-resource "azurerm_resource_group" "this" {
-  location = module.avm_utl_regions.regions[random_integer.region_index.result].name
-  name     = module.naming.resource_group.name_unique
+resource "azurerm_resource_group" "main_rg" {
+  location = local.main_region
+  name     = "${module.naming.resource_group.name_unique}-main"
+}
+resource "azurerm_resource_group" "secondary_rg" {
+  location = local.secondary_region
+  name     = "${module.naming.resource_group.name_unique}-secondary"
 }
 
 # Express Route Direct Port 1
 resource "azurerm_express_route_port" "erd_port_1" {
   bandwidth_in_gbps   = local.bandwidth_in_gbps
   encapsulation       = local.encapsulation
-  location            = azurerm_resource_group.this.location
+  location            = azurerm_resource_group.main_rg.location
   name                = local.erd1_port_name
   peering_location    = local.erd1_peering_location
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = azurerm_resource_group.main_rg.name
 
   link1 {
     admin_enabled = false
@@ -96,10 +102,10 @@ resource "azurerm_express_route_port" "erd_port_1" {
 resource "azurerm_express_route_port" "erd_port_2" {
   bandwidth_in_gbps   = local.bandwidth_in_gbps
   encapsulation       = local.encapsulation
-  location            = azurerm_resource_group.this.location
+  location            = azurerm_resource_group.secondary_rg.location
   name                = local.erd2_port_name
   peering_location    = local.erd2_peering_location
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = azurerm_resource_group.secondary_rg.name
 
   link1 {
     admin_enabled = false
@@ -115,9 +121,9 @@ resource "azurerm_express_route_port" "erd_port_2" {
 module "er_circuit_1" {
   source = "../../"
 
-  location            = azurerm_resource_group.this.location
+  location            = azurerm_resource_group.main_rg.location
   name                = local.erc1_name
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = azurerm_resource_group.main_rg.name
   sku = {
     tier   = local.tier
     family = local.family
@@ -149,9 +155,9 @@ module "er_circuit_1" {
 module "er_circuit_2" {
   source = "../../"
 
-  location            = azurerm_resource_group.this.location
+  location            = azurerm_resource_group.secondary_rg.location
   name                = local.erc2_name
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = azurerm_resource_group.secondary_rg.name
   sku = {
     tier   = local.tier
     family = local.family
@@ -189,8 +195,8 @@ The following resources are used by this module:
 
 - [azurerm_express_route_port.erd_port_1](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_port) (resource)
 - [azurerm_express_route_port.erd_port_2](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/express_route_port) (resource)
-- [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
-- [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
+- [azurerm_resource_group.main_rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [azurerm_resource_group.secondary_rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
@@ -218,12 +224,6 @@ No outputs.
 ## Modules
 
 The following Modules are called:
-
-### <a name="module_avm_utl_regions"></a> [avm\_utl\_regions](#module\_avm\_utl\_regions)
-
-Source: Azure/avm-utl-regions/azurerm
-
-Version: 0.5.2
 
 ### <a name="module_er_circuit_1"></a> [er\_circuit\_1](#module\_er\_circuit\_1)
 
