@@ -59,7 +59,7 @@ locals {
 # This allows us to randomize the region for the resource group.
 module "avm_utl_regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.5.2"
+  version = "0.12.0"
 }
 
 # This allows us to randomize the region for the resource group.
@@ -72,7 +72,7 @@ resource "random_integer" "region_index" {
 # This ensures we have unique CAF compliant names for our resources.
 module "naming" {
   source  = "Azure/naming/azurerm"
-  version = "0.4.2"
+  version = "0.4.3"
 }
 
 
@@ -284,7 +284,7 @@ The following Modules are called:
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: 0.5.2
+Version: 0.12.0
 
 ### <a name="module_exr_circuit_test"></a> [exr\_circuit\_test](#module\_exr\_circuit\_test)
 
@@ -296,7 +296,7 @@ Version:
 
 Source: Azure/naming/azurerm
 
-Version: 0.4.2
+Version: 0.4.3
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
