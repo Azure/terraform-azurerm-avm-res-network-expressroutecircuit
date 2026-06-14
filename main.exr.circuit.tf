@@ -1,4 +1,3 @@
-
 # Create the Express Route Circuit
 resource "azurerm_express_route_circuit" "this" {
   location                 = var.location
