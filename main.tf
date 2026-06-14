@@ -41,6 +41,7 @@ resource "azurerm_express_route_circuit_peering" "this" {
       }
     }
   }
+
   dynamic "microsoft_peering_config" {
     for_each = each.value.microsoft_peering_config != null ? [each.value.microsoft_peering_config] : []
 
@@ -160,6 +161,7 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
       category_group = enabled_log.value
     }
   }
+
   dynamic "metric" {
     for_each = each.value.metric_categories
 
