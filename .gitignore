@@ -61,4 +61,4 @@ avm.tflint_module.merged.hcl
 *.depricated
 examples/*/policy
 *.mptfbackup
-.avm
+.avm/managed-files.json
