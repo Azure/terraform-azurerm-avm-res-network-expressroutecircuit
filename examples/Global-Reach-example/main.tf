@@ -45,6 +45,7 @@ resource "azurerm_resource_group" "main_rg" {
   location = local.main_region
   name     = "${module.naming.resource_group.name_unique}-main"
 }
+
 resource "azurerm_resource_group" "secondary_rg" {
   location = local.secondary_region
   name     = "${module.naming.resource_group.name_unique}-secondary"
@@ -63,6 +64,7 @@ resource "azurerm_express_route_port" "erd_port_1" {
     admin_enabled = false
     macsec_cipher = "GcmAes256"
   }
+
   link2 {
     admin_enabled = false
     macsec_cipher = "GcmAes256"
@@ -82,6 +84,7 @@ resource "azurerm_express_route_port" "erd_port_2" {
     admin_enabled = false
     macsec_cipher = "GcmAes256"
   }
+
   link2 {
     admin_enabled = false
     macsec_cipher = "GcmAes256"
