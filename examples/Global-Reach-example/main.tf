@@ -111,7 +111,7 @@ module "er_circuit_1" {
       address_prefix_ipv4      = "192.168.8.0/29"
     }
   }
-  enable_telemetry               = var.enable_telemetry # see variables.tf
+  enable_telemetry               = false # see variables.tf
   express_route_port_resource_id = azurerm_express_route_port.erd_port_1.id
   peerings = {
     PrivatePeeringConfig = {
@@ -137,7 +137,7 @@ module "er_circuit_2" {
     family = local.family
   }
   bandwidth_in_gbps              = 10
-  enable_telemetry               = var.enable_telemetry # see variables.tf
+  enable_telemetry               = false # see variables.tf
   express_route_port_resource_id = azurerm_express_route_port.erd_port_2.id
   peerings = {
     PrivatePeeringConfig = {
