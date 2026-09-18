@@ -37,7 +37,7 @@ module "avm_utl_regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.12.0"
 
-  enable_telemetry = false
+  enable_telemetry = var.enable_telemetry
 }
 
 # This allows us to randomize the region for the resource group.
@@ -91,6 +91,6 @@ module "exr_circuit_test" {
     family = local.family
   }
   bandwidth_in_gbps              = 10
-  enable_telemetry               = false # see variables.tf
+  enable_telemetry               = var.enable_telemetry # see variables.tf
   express_route_port_resource_id = azurerm_express_route_port.example.id
 }
